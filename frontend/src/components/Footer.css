@@ -1,0 +1,174 @@
+/*
+ * Footer link hover effects — COMPANY + SERVICES lists.
+ *
+ * Design goals
+ *  - Modern, smooth, professional feel (premium construction & engineering).
+ *  - Pure CSS — no JS, uses ::after pseudo-element for the animated underline.
+ *  - Smooth ~250ms transitions with a tasteful cubic-bezier curve.
+ *  - Keyboard-accessible: :focus-visible mirrors :hover behaviour.
+ *  - Large, forgiving click target (padding extends beyond the visible text).
+ *  - Unobtrusive default state (link colour matches existing design).
+ *  - The external-link arrow on SERVICES rows slides a little further on
+ *    hover so it "leads" the link.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Shared base for every link inside the COMPANY + SERVICES lists.    */
+/* ------------------------------------------------------------------ */
+
+.footer-link {
+  /* Geometry — keep text color unchanged when idle. */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;                       /* 4px — matches existing gap-1  */
+
+  /* Generous click target without growing the row height visibly.       */
+  padding: 0.25rem 0;                 /* 4px top + bottom             */
+  margin: -0.25rem 0;                 /* negative margin keeps spacing */
+  min-height: 1.75rem;                /* ~28px click height            */
+
+  color: rgba(255, 255, 255, 0.70);   /* matches existing text-white/70 */
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+
+  /* Slightly brighten the colour on hover/focus for that "premium" lift. */
+  transition:
+    color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Translate the whole row a hair to the right on hover. */
+  will-change: transform, color;
+}
+
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: #FF8A00;                     /* brand orange — pops on dark footer */
+  transform: translateX(3px);
+  outline: none;                      /* custom focus ring is drawn below */
+}
+
+/* ------------------------------------------------------------------ */
+/* Animated underline — slides in from left to right on hover/focus.   */
+/* ::after pseudo-element scales horizontally from 0 to 1,             */
+/* anchored to the left edge so it grows in the correct direction.    */
+/* ------------------------------------------------------------------ */
+
+.footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: auto;                        /* explicit — pin to the left     */
+  bottom: 0.125rem;                   /* sits just under the baseline   */
+  height: 1.5px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #FF8A00 0%,                       /* brand orange (smsorange-500) */
+    #FFB04D 100%                      /* soft orange  (smsorange-300) */
+  );
+  border-radius: 9999px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.footer-link:hover::after,
+.footer-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------ */
+/* Keyboard focus ring — subtle, professional, matches the brand.     */
+/* Drawn as a soft outline so it works on the dark background.        */
+/* ------------------------------------------------------------------ */
+
+.footer-link:focus-visible {
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.45);  /* smsorange-500/45 */
+}
+
+/* ------------------------------------------------------------------ */
+/* SERVICES link — external arrow (↗) gets its own gentle slide.       */
+/* The icon starts at opacity-50 (matches existing), lifts to 1        */
+/* and translates further right than the row, so it "leads" the link. */
+/* ------------------------------------------------------------------ */
+
+.footer-link .footer-link__arrow {
+  display: inline-block;
+  opacity: 0.5;                       /* matches existing markup        */
+  transition:
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link:hover .footer-link__arrow,
+.footer-link:focus-visible .footer-link__arrow {
+  opacity: 1;
+  transform: translateX(2px);         /* extra nudge beyond row's 3px  */
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced-motion users — disable translate/scale, keep colour only.  */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-link,
+  .footer-link .footer-link__arrow,
+  .footer-link::after {
+    transition: color 120ms linear;
+    transform: none !important;
+  }
+  .footer-link::after {
+    /* Underline snaps in instantly — no animation. */
+    transition: none;
+  }
+  .footer-link:hover::after,
+  .footer-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Variant: link-with-leading-icon (CONTACT phone number).             */
+/* The icon sits INSIDE the link so the whole row is one tap target    */
+/* and animates together.                                              */
+/* ------------------------------------------------------------------ */
+
+.footer-link--with-icon {
+  /* Preserve the original inherited idle colour (text-white/80 from the
+     parent <ul>) so this row matches the email/office rows above and
+     below it. */
+  color: rgba(255, 255, 255, 0.80);
+  /* A touch more vertical padding so the larger click area still feels
+     balanced with the other (text-only) links. */
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  margin-top: -0.375rem;
+  margin-bottom: -0.375rem;
+}
+
+.footer-link__icon {
+  display: inline-block;
+  transition:
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter    250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link:hover .footer-link__icon,
+.footer-link:focus-visible .footer-link__icon {
+  /* Subtle nudge beyond the link's 3px translate so the icon "leads". */
+  transform: translateX(2px);
+  /* Brighten the orange icon a touch so it feels part of the hover. */
+  filter: brightness(1.15);
+}
+
+/* On the phone row the ::after underline sits under the text only,
+   not under the icon. Push it right so it lines up with the digits. */
+.footer-link--with-icon::after {
+  left: 1.25rem;       /* icon width (1rem) + 0.25rem gap */
+  width: auto;
+  right: 0;
+}

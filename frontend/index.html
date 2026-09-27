@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sayed Musawer Sadat Construction and Engineering Design Company (SMS) - Building with Passion, Delivering with Pride. A premier Afghan construction and engineering company delivering high-rise buildings, infrastructure, water & irrigation, energy, and rehabilitation projects." />
+    <meta name="keywords" content="SMS, SMS Construction, Afghanistan construction, Kabul construction, Nangarhar construction, engineering design, infrastructure, building construction, roads, bridges, irrigation, solar energy" />
+    <meta property="og:title" content="SMS Construction & Engineering Design Company" />
+    <meta property="og:description" content="Building with Passion, Delivering with Pride. Premier Afghan construction and engineering company." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <title>SMS — Construction & Engineering Design Company</title>
+    <script>
+      // Set the theme on <html> BEFORE React paints, so dark-mode users
+      // never see a light-mode flash on page load / refresh.
+      (function () {
+        try {
+          var saved = window.localStorage.getItem('theme');
+          if (saved !== 'light' && saved !== 'dark') {
+            saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+              ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

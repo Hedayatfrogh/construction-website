@@ -1,0 +1,450 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1976D2;
+  --color-primary-dark: #114A85;
+  --color-secondary: #FF8A00;
+  --color-accent: #EAF4FF;
+  --color-charcoal: #1F2937;
+}
+
+html {
+  height: 100%;
+  /* Block horizontal scroll. `overflow-x: clip` on the root scrolling
+     element does NOT create a sticky-breaking scroll container (unlike
+     `overflow: hidden`). However it MUST be on the scrolling element
+     itself — applying it to a child element would break position:
+     sticky on the navbar. So we keep it ONLY on `html`. */
+  overflow-x: clip;
+}
+
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Inherit the html overflow-clip behavior so the body itself never
+     exceeds the viewport width. We intentionally do NOT set `height:
+     100%` here so that #root can grow naturally and position: sticky
+     works correctly on the navbar. */
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LIGHT / DARK THEME TOKENS
+   All "neutral" surface / text / border colors are defined here as CSS
+   variables. Components keep using their existing Tailwind classes
+   (.bg-white, .text-charcoal-900, .border-charcoal-100, ...) — the rules
+   below re-point those utilities at the variables depending on
+   data-theme, so flipping data-theme re-skins the whole app without
+   touching any JSX. Brand-color classes (.bg-smsorange-*, .text-smsgold-*
+   .bg-navy-*) are intentionally NOT overridden.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="light"] {
+  --bg-page:        #ffffff;
+  --bg-surface:     #ffffff;
+  --bg-surface-2:   #F8FAFC;
+  --bg-surface-3:   #EEF2F7;
+
+  --text-primary:   #1F2937;
+  --text-body:      #2D3540;
+  --text-muted:     #5C6678;
+  --text-subtle:    #8A95A8;
+
+  --border-soft:    #EEF2F7;
+  --border-medium:  #D7DEE8;
+
+  --input-bg:        #ffffff;
+  --input-border:    #D7DEE8;
+  --input-placeholder:#8A95A8;
+
+  --bg-ghost-tile:  #ffffff;
+  --hero-fade-to:   #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg-page:        #0F172A;
+  --bg-surface:     #1F2937;
+  --bg-surface-2:   #182234;
+  --bg-surface-3:   #243044;
+
+  --text-primary:   #F1F5F9;
+  --text-body:      #E2E8F0;
+  --text-muted:     #94A3B8;
+  --text-subtle:    #64748B;
+
+  --border-soft:    #2A3344;
+  --border-medium:  #384559;
+
+  --input-bg:        #1F2937;
+  --input-border:    #384559;
+  --input-placeholder:#64748B;
+
+  --bg-ghost-tile:  #1F2937;
+  --hero-fade-to:   #0F172A;
+}
+
+/* The `body` element gets its colors from a rule inside @layer base
+   further down. The Tailwind utility overrides also live further down
+   outside any @layer wrapper so they win over Tailwind's emitted
+   utilities. */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Tailwind utility overrides — these are PLAIN CSS (no @layer wrapper).
+   That gives them higher cascade priority than Tailwind's emitted
+   `utilities` layer, so they actually win and the theme tokens take
+   effect. Brand-color utilities (.bg-smsorange-*, .text-smsgold-*,
+   .bg-navy-*) are intentionally NOT overridden — same accent in both
+   themes.
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  /* The Tailwind utility overrides live OUTSIDE @layer below — see the
+     plain-CSS block right after this @layer. Tailwind emits its own
+     .bg-white / .text-charcoal-* / .border-charcoal-* rules into the
+     `utilities` layer, which has HIGHER priority than `base`. Re-mapping
+     utilities inside @layer base is a silent no-op. */
+
+  /* Element-level defaults that ARE legitimately "base" — apply the page
+     tokens to the body so unstyled content still reads correctly. */
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Tailwind utility overrides — these are PLAIN CSS (no @layer wrapper).
+   That gives them higher cascade priority than Tailwind's emitted
+   `utilities` layer, so they actually win and the theme tokens take
+   effect. Brand-color utilities (.bg-smsorange-*, .text-smsgold-*,
+   .bg-navy-*) are intentionally NOT overridden — same accent in both
+   themes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Surfaces (background-color) */
+.bg-white             { background-color: var(--bg-surface) !important; }
+.bg-charcoal-50       { background-color: var(--bg-surface-2) !important; }
+.bg-charcoal-100      { background-color: var(--bg-surface-3) !important; }
+.bg-charcoal-200      { background-color: var(--border-medium) !important; }
+.bg-gray-50           { background-color: var(--bg-surface-2) !important; }
+.bg-gray-100          { background-color: var(--bg-surface-3) !important; }
+
+/* Text */
+.text-charcoal-900    { color: var(--text-primary) !important; }
+.text-charcoal-800    { color: var(--text-body)    !important; }
+.text-charcoal-700    { color: var(--text-body)    !important; }
+.text-charcoal-600    { color: var(--text-body)    !important; }
+.text-charcoal-500    { color: var(--text-muted)   !important; }
+.text-charcoal-400    { color: var(--text-subtle)  !important; }
+.text-gray-700        { color: var(--text-body)    !important; }
+.text-gray-600        { color: var(--text-body)    !important; }
+.text-gray-500        { color: var(--text-muted)   !important; }
+.text-gray-400        { color: var(--text-subtle)  !important; }
+.text-gray-900        { color: var(--text-primary) !important; }
+
+/* Borders */
+.border-charcoal-100  { border-color: var(--border-soft)   !important; }
+.border-charcoal-200  { border-color: var(--border-medium) !important; }
+.border-charcoal-300  { border-color: var(--border-medium) !important; }
+.border-gray-300      { border-color: var(--input-border)  !important; }
+
+/* Hover backgrounds used by the navbar / cards / table rows */
+.hover\:bg-charcoal-50:hover   { background-color: var(--bg-surface-3) !important; }
+.hover\:bg-charcoal-100:hover  { background-color: var(--bg-surface-3) !important; }
+.hover\:bg-gray-50:hover       { background-color: var(--bg-surface-3) !important; }
+.hover\:bg-gray-100:hover      { background-color: var(--bg-surface-3) !important; }
+
+/* Hover text — the nav links hover to brand orange in light mode; in dark
+   mode that still reads well on the dark navbar. We don't override it
+   because Tailwind's hover:text-smsorange-500 is a brand color. The
+   hover:text-charcoal-* utilities below DO need flipping. */
+.hover\:text-charcoal-900:hover { color: var(--text-primary) !important; }
+.hover\:text-charcoal-800:hover { color: var(--text-body)    !important; }
+.hover\:text-charcoal-700:hover { color: var(--text-body)    !important; }
+
+/* Dividers (used by some page borders) */
+.divide-charcoal-100 > * + * { border-color: var(--border-soft) !important; }
+.divide-gray-100 > * + *      { border-color: var(--border-soft) !important; }
+
+/* Placeholder colors used by the search input / Login form / Contact
+   form. The actual input background + text is set in the input:not(...)
+   block below — this is just the placeholder tone. */
+.placeholder-charcoal-400::placeholder,
+.placeholder-gray-400::placeholder {
+  color: var(--input-placeholder) !important;
+}
+
+/* Focus rings on inputs */
+.focus\:ring-charcoal-300:focus { --tw-ring-color: var(--border-medium) !important; }
+.focus\:border-charcoal-300:focus { border-color: var(--border-medium) !important; }
+
+/* The Hero's bottom-fade gradient (e.g. `to-white`) needs to land on
+   the page bg color so the hero fades seamlessly into the next section
+   in both themes. */
+.to-white { --tw-gradient-to: var(--hero-fade-to) var(--tw-gradient-to-position); }
+
+/* Inputs in the Contact form / Login form / search bar etc. — make them
+   legible on both themes. The Contact form already uses
+   border-charcoal-200 + bg is left to the browser; we add a soft bg
+   for inputs that are inside .bg-white sections so they don't look
+   transparent in dark mode. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+textarea,
+select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Theme toggle button — small, accessible, theme-aware.
+   In light mode: dark icon on light surface (high contrast).
+   In dark mode: light icon on dark surface (high contrast).
+   Hover always nudges toward the brand orange.
+   ───────────────────────────────────────────────────────────────────────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width:  2.5rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  /* Always paint the icon with a high-contrast color regardless of
+     which Tailwind text class happens to wrap the button. */
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--border-soft);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  background-color: var(--bg-surface-3);
+  color: #FF8A00;            /* brand orange */
+  border-color: var(--border-medium);
+}
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.45);
+}
+.theme-toggle:active {
+  transform: scale(0.96);
+}
+/* Lucide icons render as inline SVGs with stroke="currentColor". The
+   rule above sets `color` so the stroke inherits it. We also force
+   width/height and stroke-width so the icon is always visible, even
+   if the parent somehow collapses it. */
+.theme-toggle svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+/* Navbar shadow tweak so the white navbar still reads as elevated in
+   dark mode. */
+header.bg-white {
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 4px 18px -8px rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] header.bg-white {
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.30),
+    0 4px 18px -8px rgba(0, 0, 0, 0.45);
+}
+
+/* The dashed empty-state cards (Projects, Clients) use bg-charcoal-50 +
+   border-charcoal-200, which we override. In dark mode we want a
+   slightly different feel — keep the dashed look but darker. */
+[data-theme="dark"] .border-dashed {
+  border-color: var(--border-medium);
+}
+
+/* Search input inside the dashboard — it currently uses a Tailwind
+   class chain that's hard to override generally. If we see issues in
+   the dashboard, we patch it there. */
+
+
+#root {
+  /* #root must NOT have `height: 100%` or `overflow: clip` — either
+     would turn #root into a scroll container and break position: sticky
+     on the navbar (it would scroll out of view with the page). Let it
+     size naturally from its content. */
+  min-height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  /* Long unbroken words in headings/paragraphs must be allowed to break so
+     they never push the layout wider than the container. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@layer components {
+  .sms-container { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .sms-section { @apply py-16 md:py-24; }
+  .sms-section-tight { @apply py-12 md:py-16; }
+  .sms-eyebrow { @apply inline-block text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-navy-500; }
+  .sms-heading { @apply font-display text-3xl md:text-4xl lg:text-5xl font-bold text-charcoal-900 leading-tight; }
+  .sms-heading-xl { @apply font-display text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05]; }
+  .sms-subheading { @apply mt-4 text-base md:text-lg text-charcoal-500 max-w-2xl; }
+  .sms-btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-md bg-navy-500 px-5 py-3 text-sm font-semibold text-white shadow-sms-soft transition hover:bg-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:ring-offset-2; }
+  .sms-btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-md border border-white/30 bg-white/10 backdrop-blur px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent; }
+  .sms-btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-md border border-charcoal-200 px-5 py-3 text-sm font-semibold text-charcoal-800 transition hover:border-navy-400 hover:text-navy-700 focus:outline-none focus:ring-2 focus:ring-navy-300; }
+  .sms-card { @apply rounded-xl bg-white border border-charcoal-100 shadow-sms-soft transition hover:shadow-sms-strong hover:-translate-y-1 duration-300; }
+  .sms-link { @apply text-navy-600 hover:text-navy-700 font-semibold transition; }
+  .sms-divider { @apply h-px w-full bg-gradient-to-r from-transparent via-charcoal-200 to-transparent; }
+
+  /* ─────────────────────────────────────────────────────────────
+     Premium card hover treatment — used across WhySMS,
+     Sustainability, Methodology, EquipmentShowcase, and any
+     other "value/step/pillar" card on light OR dark surfaces.
+
+     Designed to feel premium and minimal: subtle 4px lift,
+     soft shadow that deepens, and a delicate gold/orange accent
+     on the border, title, number, and icon. All transitions
+     use a 300ms ease-out curve (within the 250–350ms target).
+     The whole treatment uses `group` + `group-hover:` so any
+     child tagged with `.sms-hover-target` reacts together.
+
+     Honours `prefers-reduced-motion` by disabling translate /
+     scale and keeping only the colour + shadow changes.
+     Also gated behind `@media (hover: hover)` so touch devices
+     never trigger the animation.
+     ───────────────────────────────────────────────────────────── */
+  .sms-hover-card {
+    @apply relative will-change-transform transition-all duration-300 ease-out;
+  }
+  @media (hover: hover) {
+    .sms-hover-card:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Light-surface variant — paired with the existing white / light
+     card backgrounds in WhySMS, Methodology, EquipmentShowcase. */
+  .sms-hover-card--light {
+    @apply hover:border-smsgold-400 hover:shadow-sms-strong;
+  }
+  @media (hover: hover) {
+    .sms-hover-card--light:hover {
+      box-shadow:
+        0 12px 32px -12px rgba(25, 118, 210, 0.18),
+        0 0 0 1px rgba(255, 186, 80, 0.35) inset;
+    }
+  }
+
+  /* Dark-surface variant — paired with cards sitting on dark
+     sections like Sustainability (bg-navy-800). */
+  .sms-hover-card--dark {
+    @apply hover:border-smsgold-400/70 hover:bg-white/10;
+  }
+  @media (hover: hover) {
+    .sms-hover-card--dark:hover {
+      box-shadow:
+        0 12px 32px -12px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 186, 80, 0.25) inset;
+    }
+  }
+
+  /* Children that should react when the parent .sms-hover-card
+     is hovered. Each is a small, isolated motion cue so the
+     card never feels jittery. */
+  .sms-hover-target {
+    @apply transition-[color,transform,background-color] duration-300 ease-out;
+  }
+
+  /* The card title — nudges to the brand blue on hover (light
+     cards) or brightens on dark cards. Subtle, never bold. */
+  @media (hover: hover) {
+    .sms-hover-card--light:hover .sms-hover-target--title {
+      @apply text-navy-700;
+    }
+    .sms-hover-card--dark:hover .sms-hover-target--title {
+      @apply text-white;
+    }
+    /* The accent number / icon tile — slight scale + accent shift. */
+    .sms-hover-card:hover .sms-hover-target--icon {
+      transform: scale(1.06);
+    }
+    .sms-hover-card--light:hover .sms-hover-target--icon {
+      @apply bg-smsorange-100 text-smsorange-600;
+    }
+    .sms-hover-card--dark:hover .sms-hover-target--icon {
+      @apply bg-smsgold-400/25 text-smsgold-300;
+    }
+    /* The large watermark number (e.g. Methodology "01"–"06") —
+       fades from light gray to the brand orange. */
+    .sms-hover-card--light:hover .sms-hover-target--watermark {
+      @apply text-smsorange-200;
+    }
+    /* The divider hairline under the number in WhySMS cards. */
+    .sms-hover-card--light:hover .sms-hover-target--rule {
+      @apply bg-smsgold-400;
+    }
+  }
+
+  /* Subtle pill / chip hover for tag-list rows (Upcoming). */
+  .sms-hover-pill {
+    @apply will-change-transform transition-all duration-300 ease-out;
+  }
+  @media (hover: hover) {
+    .sms-hover-pill:hover {
+      transform: translateY(-2px);
+      @apply border-smsgold-400 text-navy-700 shadow-sms-soft;
+    }
+  }
+}
+
+html { scroll-behavior: smooth; }
+::selection { background: #1976D2; color: #ffffff; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Global safeguards so no descendant can push the page wider than 100vw.
+   `min-width: 0` lets flex/grid items actually shrink below their intrinsic
+   size — the most common cause of horizontal overflow on otherwise
+   correct layouts. */
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Reduced-motion guard — disables translate / scale for users
+   who've requested reduced motion at the OS level. Colour and
+   shadow changes are preserved because they're informational,
+   not motion.
+   ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sms-hover-card,
+  .sms-hover-target,
+  .sms-hover-pill {
+    transition: color 120ms linear, background-color 120ms linear, border-color 120ms linear, box-shadow 120ms linear;
+  }
+  .sms-hover-card:hover,
+  .sms-hover-target--icon,
+  .sms-hover-pill:hover {
+    transform: none !important;
+  }
+}
+
