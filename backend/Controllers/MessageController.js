@@ -1,72 +1,74 @@
-const catchAsync = require('../utils/CatchAsync')
-const db = require('../config/db')
+const catchAsync = require('../utils/CatchAsync');
+const AppError = require('../utils/AppError');
+const Message = require('../models/Message');
 
 exports.createMessage = catchAsync(async (req, res, next) => {
   const { firstName, lastName, company, email, description, websiteId } =
-    req.body
+    req.body;
 
   if (!['spark_trust', 'azad_noori'].includes(websiteId)) {
-    return next(new AppError('Invalid websiteId', 400))
+    return next(new AppError('Invalid websiteId', 400));
   }
 
-  const [result] = await db.execute(
-    `INSERT INTO messages (firstName, lastName, company, email, description, websiteId)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [firstName, lastName, company, email, description, websiteId]
-  )
+  const newMessage = await Message.create({
+    firstName,
+    lastName,
+    company: company || '',
+    email,
+    description,
+    websiteId,
+  });
 
   res.status(201).json({
     status: 'success',
     data: {
-      id: result.insertId,
-      firstName,
-      lastName,
-      company,
-      email,
-      description,
-      websiteId
-    }
-  })
-})
+      id: newMessage.id || newMessage._id,
+      firstName: newMessage.firstName,
+      lastName: newMessage.lastName,
+      company: newMessage.company,
+      email: newMessage.email,
+      description: newMessage.description,
+      websiteId: newMessage.websiteId,
+    },
+  });
+});
 
 exports.getMessagesByWebsite = catchAsync(async (req, res, next) => {
-  const { websiteId } = req.params
+  const { websiteId } = req.params;
 
   if (!['spark_trust', 'azad_noori'].includes(websiteId)) {
-    return next(new AppError('Invalid websiteId', 400))
+    return next(new AppError('Invalid websiteId', 400));
   }
 
-  const [messages] = await db.execute(
-    `SELECT * FROM messages WHERE websiteId = ? ORDER BY createdAt DESC`,
-    [websiteId]
-  )
+  const messages = await Message.find({ websiteId }).sort({ createdAt: -1 });
 
   res.status(200).json({
     status: 'success',
     results: messages.length,
-    data: messages
-  })
-})
+    data: messages,
+  });
+});
 
 exports.updateMessage = catchAsync(async (req, res, next) => {
-  const { id } = req.params
-  const { isRead } = req.body
+  const { id } = req.params;
+  const { isRead } = req.body;
 
   if (typeof isRead !== 'boolean') {
-    return next(new AppError('isRead must be a boolean', 400))
+    return next(new AppError('isRead must be a boolean', 400));
   }
 
-  const [result] = await db.execute(
-    `UPDATE messages SET isRead = ? WHERE id = ?`,
-    [isRead, id]
-  )
+  const message = await Message.findByIdAndUpdate(
+    id,
+    { isRead },
+    { new: true, runValidators: true }
+  );
 
-  if (result.affectedRows === 0) {
-    return next(new AppError('No message found with that ID', 404))
+  if (!message) {
+    return next(new AppError('No message found with that ID', 404));
   }
 
   res.status(200).json({
     status: 'success',
-    message: 'Message updated successfully'
-  })
-})
+    message: 'Message updated successfully',
+  });
+});

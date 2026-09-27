@@ -11,6 +11,10 @@ const path = require('path');
 const globalErrorHandler = require('./Controllers/globalErrorHandler');
 const MessageRouter = require('./Routers/messageRouter');
 const usersRouter = require('./Routers/usersRouter');
+const provincesRouter = require('./Routers/provincesRouter');
+const categoriesRouter = require('./Routers/categoriesRouter');
+const companiesRouter = require('./Routers/companiesRouter');
+const advertisementsRouter = require('./Routers/advertisementsRouter');
 
 const app = express();
 
@@ -143,6 +147,10 @@ app.use(
 
 app.use('/api/v1/messages', MessageRouter);
 app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/provinces', provincesRouter);
+app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/companies', companiesRouter);
+app.use('/api/v1/advertisements', advertisementsRouter);
 
 // Global error handler
 app.use(globalErrorHandler);
