@@ -1,21 +1,22 @@
 const dotenv = require('dotenv');
 const path = require('path');
 const os = require('os');
+const connectDB = require('./config/db');
 
-// Load config.env with absolute path
+// Load environment variables (.env first, config.env fallback)
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, 'config.env') });
 
 console.log('Loaded environment variables in server.js:', {
-  DB_HOST: process.env.DB_HOST,
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  DB_NAME: process.env.DB_NAME,
-  PORT: process.env.PORT,
-  HOST: process.env.HOST,
+  MONGODB_URI: process.env.MONGODB_URI ? '[CONFIGURED]' : '[USING DEFAULT FALLBACK]',
+  PORT: process.env.PORT || 2000,
+  HOST: process.env.HOST || '0.0.0.0',
 });
 
 const app = require('./app');
-const db = require('./config/db'); // MySQL connection
+
+// Connect to MongoDB Atlas / Local MongoDB
+connectDB();
 
 const port = process.env.PORT || 2000;
 // Bind explicitly to 0.0.0.0 so the server is reachable from other devices

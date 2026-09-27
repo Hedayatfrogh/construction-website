@@ -2,7 +2,7 @@
 const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/CatchAsync');
-const pool = require('../config/db');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 // Helper: is the request coming from a local / LAN context? (plain HTTP,
@@ -30,12 +30,12 @@ const isLocalOrigin = (origin) => {
 
 const signToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d',
   });
 };
 
 const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user.id, user.role);
+  const token = signToken(user._id || user.id, user.role);
   const origin = req.headers.origin || 'no origin';
   const localOrigin = isLocalOrigin(origin);
 
@@ -49,7 +49,7 @@ const createSendToken = (user, statusCode, req, res) => {
 
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + (process.env.JWT_COOKIE_EXPIRES_IN || 90) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
     secure: localOrigin ? false : true,
@@ -66,11 +66,13 @@ const createSendToken = (user, statusCode, req, res) => {
   res.cookie(cookieName, token, cookieOptions);
   console.log('Response headers after setting cookie:', res.getHeaders());
 
-  delete user.password;
+  const userObj = user.toObject ? user.toObject() : { ...user };
+  delete userObj.password;
+
   res.status(statusCode).json({
     status: 'success',
     token,
-    data: { user },
+    data: { user: userObj },
   });
 };
 
@@ -80,11 +82,10 @@ exports.logIn = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide your email and password!', 400));
   }
 
-  const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
-  if (rows.length === 0) {
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
     return next(new AppError('Incorrect email or password!', 401));
   }
-  const user = rows[0];
 
   const correctPassword = await bcrypt.compare(password, user.password);
   if (!correctPassword) {
@@ -129,7 +130,7 @@ exports.protect = async (req, res, next) => {
       cookieName = 'jwt_sparktrust';
     }
 
-    if (req.cookies[cookieName]) {
+    if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
       console.log(`Using cookie-based token (${cookieName}):`, token.slice(0, 20) + '...');
     } else if (
@@ -154,15 +155,12 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Decoded token:', decoded);
 
-    const [rows] = await pool.execute(
-      'SELECT id, email, name, role FROM users WHERE id = ?',
-      [decoded.id]
-    );
-    if (rows.length === 0) {
+    const currentUser = await User.findById(decoded.id).select('-password');
+    if (!currentUser) {
       return next(new AppError('The user belonging to this token no longer exists.', 401));
     }
 
-    req.user = rows[0];
+    req.user = currentUser;
     next();
   } catch (err) {
     return next(new AppError(`Invalid token: ${err.message}`, 401));
@@ -170,7 +168,7 @@ exports.protect = async (req, res, next) => {
 };
 
 exports.getMe = catchAsync(async (req, res, next) => {
-  if (!req.user || !req.user.id) {
+  if (!req.user || (!req.user.id && !req.user._id)) {
     return next(new AppError('No authenticated user found.', 401));
   }
   res.status(200).json({
