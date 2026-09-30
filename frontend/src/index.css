@@ -251,6 +251,156 @@ input::placeholder, textarea::placeholder {
   flex-shrink: 0;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Language switcher — pill-shaped EN ⇄ دری toggle.
+
+   Visual contract: matches `.theme-toggle` in size/weight so the two
+   controls read as a matched pair on the right edge of the navbar.
+   ───────────────────────────────────────────────────────────────────────── */
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.5rem;        /* same height as .theme-toggle */
+  padding: 0 0.4rem 0 0.5rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--border-soft);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+}
+.lang-switcher:hover {
+  background-color: var(--bg-surface-3);
+  border-color: var(--border-medium);
+}
+.lang-switcher:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.45);
+}
+.lang-switcher__icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.lang-switcher__pill {
+  display: inline-flex;
+  align-items: center;
+  height: 1.85rem;
+  padding: 2px;
+  border-radius: 0.4rem;
+  background-color: var(--bg-surface-2);
+  gap: 2px;
+}
+.lang-switcher__seg {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.3rem;
+  color: var(--text-muted);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+  white-space: nowrap;
+}
+.lang-switcher__seg:hover {
+  color: var(--text-primary);
+}
+.lang-switcher__seg--active {
+  background-color: #FF8A00;   /* brand orange */
+  color: #ffffff;
+  box-shadow: 0 2px 6px -2px rgba(255, 138, 0, 0.55);
+}
+.lang-switcher__seg--active:hover {
+  color: #ffffff;
+}
+.lang-switcher__seg:active {
+  transform: scale(0.96);
+}
+.lang-switcher__seg:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.45);
+}
+/* Dari segment uses a slightly larger size + RTL-friendly styling so
+   "دری" sits nicely next to "EN" in either document direction. */
+.lang-switcher__seg--rtl {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RTL overrides for the language switcher.
+   When the document is RTL the icon should sit on the visual LEFT (after
+   the pill), so we swap the padding side. The pill itself is direction-
+   neutral, so no changes there.
+   ───────────────────────────────────────────────────────────────────────── */
+[dir="rtl"] .lang-switcher {
+  padding: 0 0.5rem 0 0.4rem;
+}
+[dir="rtl"] .lang-switcher__icon {
+  /* In RTL, flip the chevron-like icon so it reads as expected. */
+  transform: scaleX(-1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Direction-aware micro-fixes used by the Navbar so the existing layout
+   continues to look correct when the document flips to RTL. These are
+   intentionally narrow so we never alter the rest of the design.
+   ───────────────────────────────────────────────────────────────────────── */
+[dir="rtl"] .sms-btn-primary .lucide,
+[dir="rtl"] .sms-btn-primary svg {
+  /* Flip the chevron-right on the Request a Consultation CTA so it
+     points the visually-correct way in RTL. */
+  transform: scaleX(-1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Generic arrow-flip helper. Apply `.rtl-flip-x` to any icon (e.g. an
+   inline ArrowRight / ChevronRight / ArrowUpRight) so it visually mirrors
+   itself in RTL — pointing the direction the user expects.
+   ───────────────────────────────────────────────────────────────────────── */
+[dir="rtl"] .rtl-flip-x {
+  transform: scaleX(-1);
+}
+
+/* Form prefix icons (Mail, Lock) always sit on the visual left in LTR.
+   In RTL they should appear on the visual right. The cleanest way is to
+   mirror the whole prefix container, which keeps internal alignment. */
+[dir="rtl"] .absolute.inset-y-0.left-0 {
+  /* no-op — Tailwind left-0 already maps to inset-inline-start in logical,
+     but Vite's CSS pipeline doesn't apply that automatically for legacy
+     `left-0` utilities. Force the swap here. */
+  right: 0;
+  left: auto;
+}
+[dir="rtl"] .absolute.inset-y-0.right-0 {
+  left: 0;
+  right: auto;
+}
+[dir="rtl"] .pl-10 { padding-left: 0;  padding-right: 2.5rem; }
+[dir="rtl"] .pr-10 { padding-right: 0; padding-left: 2.5rem; }
+
+/* Dari / Persian fonts. Falls back gracefully to Inter so non-Dari text
+   is untouched. The browser already ships Arial / Tahoma for Persian on
+   Windows, but loading a proper webfont is cleaner. */
+[lang="fa"] body,
+[dir="rtl"] body {
+  font-family: 'Vazirmatn', 'Inter', 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+}
+
 /* Navbar shadow tweak so the white navbar still reads as elevated in
    dark mode. */
 header.bg-white {
@@ -348,9 +498,17 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Dark-surface variant — paired with cards sitting on dark
-     sections like Sustainability (bg-navy-800). */
+     sections like Sustainability (bg-navy-800).
+
+     IMPORTANT: this variant must NOT shift the card's background on
+     hover. Earlier we had `hover:bg-white/10` here, but that overlays
+     a translucent white on whatever dark background the card sits on.
+     For opaque `bg-navy-800` cards (Workforce) that overlay washes
+     the card out to near-white and destroys the contrast of the white
+     text inside. The visual feedback (border brighten + shadow + lift)
+     is enough on its own, so we keep just those. */
   .sms-hover-card--dark {
-    @apply hover:border-smsgold-400/70 hover:bg-white/10;
+    @apply hover:border-smsgold-400/70;
   }
   @media (hover: hover) {
     .sms-hover-card--dark:hover {

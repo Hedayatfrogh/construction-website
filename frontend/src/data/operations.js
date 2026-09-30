@@ -16,14 +16,27 @@ export const workforce = {
   ],
 };
 
+// Each equipment category carries:
+//   - title:   the English source string (also the dictionary key prefix)
+//   - slug:    URL-safe id used by the dedicated detail page route
+//              (e.g. /equipment/earthmoving)
+//   - icon:    icon name resolved by <IconByName />
+//   - items:   ordered list of equipment items, matching the existing
+//              `equipmentCategories.<title>.items.<idx>` translation keys
 export const equipmentCategories = [
-  { title: "Earthmoving Equipment",   icon: "Truck",        items: ["Excavators","Bulldozers","Backhoe Loaders","Skid-Steer Loaders","Graders","Scrapers"] },
-  { title: "Concrete & Road Equipment", icon: "Construction", items: ["Mobile Concrete Mixers","Stationary Concrete Mixers","Concrete Pumps","Pavers","Rollers","Vibratory Rollers","Static Rollers"] },
-  { title: "Material Handling",       icon: "PackageOpen",  items: ["Cranes","Telehandlers","Forklifts","Dumper Trucks","Hand Carts / Wheelbarrows"] },
-  { title: "Drilling & Foundation",   icon: "Drill",        items: ["Compressors","Rotary Drilling Rigs","Pile Drivers","Trenchers"] },
-  { title: "Demolition & Finishing",  icon: "Hammer",       items: ["Breakers","Jackhammers","Vibrators","Trowels","Scaffolding"] },
-  { title: "Other Equipment",         icon: "PlugZap",      items: ["Generators","Lighting Towers","Water Tankers","Welding Machines"] },
+  { slug: "earthmoving",           title: "Earthmoving Equipment",     icon: "Truck",        items: ["Excavators","Bulldozers","Backhoe Loaders","Skid-Steer Loaders","Graders","Scrapers"] },
+  { slug: "concrete-road",         title: "Concrete & Road Equipment", icon: "Construction", items: ["Mobile Concrete Mixers","Stationary Concrete Mixers","Concrete Pumps","Pavers","Rollers","Vibratory Rollers","Static Rollers"] },
+  { slug: "material-handling",     title: "Material Handling",         icon: "PackageOpen",  items: ["Cranes","Telehandlers","Forklifts","Dumper Trucks","Hand Carts / Wheelbarrows"] },
+  { slug: "drilling-foundation",   title: "Drilling & Foundation",     icon: "Drill",        items: ["Compressors","Rotary Drilling Rigs","Pile Drivers","Trenchers"] },
+  { slug: "demolition-finishing",  title: "Demolition & Finishing",    icon: "Hammer",       items: ["Breakers","Jackhammers","Vibrators","Trowels","Scaffolding"] },
+  { slug: "other-equipment",       title: "Other Equipment",           icon: "PlugZap",      items: ["Generators","Lighting Towers","Water Tankers","Welding Machines"] },
 ];
+
+// Lookup helper used by the EquipmentCategoryPage: resolve a URL slug to
+// the matching category object. Falls back to `null` for unknown slugs so
+// the page can render a friendly 404 state.
+export const getEquipmentCategoryBySlug = (slug) =>
+  equipmentCategories.find((c) => c.slug === slug) || null;
 
 export const organizationChart = [
   { role: "Chief Executive Officer", department: "Executive" },
@@ -54,11 +67,34 @@ export const organizationChart = [
   ]},
 ];
 
+// Each upcoming-project category carries a stable translation `key`
+// and an English `label` that doubles as the fallback used by the i18n
+// `translate()` function. The `key` is what the consumer component
+// passes to `t(...)` so the pill text follows the current language
+// (Dari ↔ English) without re-rendering or losing visual order.
+//
+// Keys are namespaced under `home.*` because the same pills appear on
+// both the home page section and the `/upcoming-projects` page; keeping
+// them under the existing `home` block in `i18n/translations.js` avoids
+// duplicating the dictionary.
 export const upcomingProjectCategories = [
-  "Roads & Bridges","Drainage & Sewerage","Hydropower","Renewable Energy",
-  "Schools","Hospitals","Irrigation","Agricultural Infrastructure","Water Supply",
-  "Sanitation","Solar Energy","Transportation","Airport Infrastructure","Housing",
-  "Industrial Development","Commercial Development","Smart Buildings",
+  { key: "home.categoryRoadsBridges",            label: "Roads & Bridges" },
+  { key: "home.categoryDrainageSewerage",        label: "Drainage & Sewerage" },
+  { key: "home.categoryHydropower",              label: "Hydropower" },
+  { key: "home.categoryRenewableEnergy",         label: "Renewable Energy" },
+  { key: "home.categorySchools",                 label: "Schools" },
+  { key: "home.categoryHospitals",               label: "Hospitals" },
+  { key: "home.categoryIrrigation",              label: "Irrigation" },
+  { key: "home.categoryAgriculturalInfrastructure", label: "Agricultural Infrastructure" },
+  { key: "home.categoryWaterSupply",             label: "Water Supply" },
+  { key: "home.categorySanitation",              label: "Sanitation" },
+  { key: "home.categorySolarEnergy",             label: "Solar Energy" },
+  { key: "home.categoryTransportation",          label: "Transportation" },
+  { key: "home.categoryAirportInfrastructure",   label: "Airport Infrastructure" },
+  { key: "home.categoryHousing",                 label: "Housing" },
+  { key: "home.categoryIndustrialDevelopment",   label: "Industrial Development" },
+  { key: "home.categoryCommercialDevelopment",   label: "Commercial Development" },
+  { key: "home.categorySmartBuildings",          label: "Smart Buildings" },
 ];
 
 export const expansionGoals = [

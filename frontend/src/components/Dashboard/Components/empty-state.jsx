@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion"
 import { Inbox, Search } from "lucide-react"
+import { useLanguage } from "../../../context/LanguageContext"
 
 export function EmptyState({ searchQuery = "" }) {
+  const { t } = useLanguage();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -15,9 +17,9 @@ export function EmptyState({ searchQuery = "" }) {
           <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <Search className="text-gray-400" size={20} />
           </div>
-          <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1">No results found</h3>
+          <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1">{t("dashboard.empty.noResultsTitle")}</h3>
           <p className="text-sm md:text-base text-gray-500 max-w-md">
-            We couldn't find any contacts matching "{searchQuery}". Try adjusting your search terms.
+            {t("dashboard.empty.noResultsBody", searchQuery)}
           </p>
         </>
       ) : (
@@ -25,9 +27,9 @@ export function EmptyState({ searchQuery = "" }) {
           <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <Inbox className="text-gray-400" size={20} />
           </div>
-          <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1">Your inbox is empty</h3>
+          <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1">{t("dashboard.empty.emptyTitle")}</h3>
           <p className="text-sm md:text-base text-gray-500 max-w-md">
-            When you receive new contact form submissions, they will appear here.
+            {t("dashboard.empty.emptyBody")}
           </p>
         </>
       )}

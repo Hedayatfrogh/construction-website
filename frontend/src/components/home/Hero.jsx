@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Phone, PlayCircle } from "lucide-react";
-import { company, heroIntro } from "../../data/company";
+import { company } from "../../data/company";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function Hero() {
+  const { t } = useLanguage();
+  // Tagline from the dictionary so it splits naturally into two visual lines
+  // for both English ("X, Y") and Dari (", " separator keeps the layout).
+  const tagline = t("brand.tagline");
+  const taglineParts = tagline.split(",");
+
   return (
     <section className="relative isolate overflow-hidden bg-navy-900 text-white">
       {/* Background image with overlay */}
@@ -27,7 +34,7 @@ export default function Hero() {
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-smsgold-300 backdrop-blur"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-smsorange-500 animate-pulse" />
-          {company.shortName} · Established {company.established}
+          {t("home.heroBadge", company.established)}
         </motion.span>
 
         <motion.h1
@@ -36,9 +43,9 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.02] max-w-5xl"
         >
-          <span className="block">{company.tagline.split(",")[0]},</span>
+          <span className="block">{taglineParts[0]},</span>
           <span className="block bg-gradient-to-r from-smsorange-400 via-smsgold-300 to-smsgold-400 bg-clip-text text-transparent">
-            {company.tagline.split(",")[1]?.trim()}
+            {taglineParts[1]?.trim()}
           </span>
         </motion.h1>
 
@@ -48,7 +55,7 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-6 text-base md:text-lg text-white/75 max-w-2xl leading-relaxed"
         >
-          {heroIntro}
+          {t("heroIntro")}
         </motion.p>
 
         <motion.div
@@ -58,13 +65,13 @@ export default function Hero() {
           className="mt-10 flex flex-wrap items-center gap-3"
         >
           <Link to="/services" className="sms-btn-primary">
-            Explore Our Services <ArrowRight className="h-4 w-4" />
+            {t("home.heroExploreServices")} <ArrowRight className="h-4 w-4" />
           </Link>
           <Link to="/projects" className="sms-btn-secondary">
-            <PlayCircle className="h-4 w-4" /> View Our Projects
+            <PlayCircle className="h-4 w-4" /> {t("home.heroViewProjects")}
           </Link>
           <Link to="/contact" className="text-sm font-semibold text-white/80 hover:text-white inline-flex items-center gap-2 ml-1">
-            <Phone className="h-4 w-4" /> Contact Us
+            <Phone className="h-4 w-4" /> {t("home.heroContactUs")}
           </Link>
         </motion.div>
 
@@ -76,10 +83,10 @@ export default function Hero() {
           className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl"
         >
           {[
-            { k: "Founded", v: company.established },
-            { k: "Reg. No.", v: company.registrationNumber },
-            { k: "License", v: company.licenseNumber },
-            { k: "TIN", v: company.tinNumber },
+            { k: t("stats.foundedShort"), v: company.established },
+            { k: t("stats.regShort"),      v: company.registrationNumber },
+            { k: t("stats.licenseShort"),  v: company.licenseNumber },
+            { k: t("stats.tinShort"),      v: company.tinNumber },
           ].map((it) => (
             <div key={it.k} className="rounded-md border border-white/10 bg-white/5 backdrop-blur px-4 py-3">
               <div className="text-[10px] uppercase tracking-[0.2em] text-smsgold-300">{it.k}</div>

@@ -28,11 +28,14 @@ import NavLinkSmart from './NavLinkSmart';
 import { Menu, X, Phone, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { navLinks } from '../data/operations';
 import { company } from '../data/company';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 
 function Logo() {
+  const { t } = useLanguage();
   return (
     <NavLinkSmart
       to='/'
@@ -40,15 +43,15 @@ function Logo() {
       aria-label={company.shortName + ' Home'}
     >
       <span className='relative inline-flex h-10 w-10 items-center justify-center rounded-md bg-smsorange-500 font-display font-extrabold text-white shadow-sms-soft'>
-        SMS
+        {t('brandShort')}
         <span className='absolute -bottom-1 -right-1 h-3 w-3 rounded-sm bg-smsgold-400 ring-2 ring-white' />
       </span>
       <span className='hidden sm:flex flex-col leading-tight min-w-0'>
         <span className='font-display font-bold text-base md:text-lg text-charcoal-900 whitespace-nowrap'>
-          Sayed Musawer Sadat
+          {t('brandName')}
         </span>
         <span className='text-[10px] md:text-xs uppercase tracking-[0.18em] text-charcoal-500 whitespace-nowrap'>
-          Construction &amp; Engineering
+          {t('brandLine')}
         </span>
       </span>
     </NavLinkSmart>
@@ -58,6 +61,7 @@ function Logo() {
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -78,6 +82,30 @@ export default function Navbar() {
         ? "text-smsorange-500"
         : "text-charcoal-700 hover:text-smsorange-500",
     ].join(" ");
+
+  // Maps a navLink `to` path to its translation dictionary key.
+  // Kept inside the component so future path additions stay co-located.
+  // Falls back to a sanitised slug if a new path hasn't been added yet,
+  // which guarantees the navbar never renders `undefined`.
+  const navKeyFor = (to) => {
+    const map = {
+      "/":                "home",
+      "/about":           "about",
+      "/services":        "services",
+      "/projects":        "projects",
+      "/equipment":       "equipment",
+      "/team":            "team",
+      "/safety-quality":  "safetyQuality",
+      "/sustainability":  "sustainability",
+      "/methodology":     "methodology",
+      "/clients":         "clients",
+      "/news":            "news",
+      "/contact":         "contact",
+    };
+    if (map[to]) return map[to];
+    // Safe fallback: strip leading slash, take the first segment.
+    return String(to).replace(/^\/+/, "").replace(/[^a-zA-Z0-9]+(.)/g, (_, c) => c.toUpperCase());
+  };
 
   return (
     <header
@@ -108,7 +136,7 @@ export default function Navbar() {
               className={linkClass}
               end={l.to === "/"}
             >
-              {l.label}
+              {t('nav.' + navKeyFor(l.to))}
             </NavLinkSmart>
           ))}
         </nav>
@@ -116,12 +144,13 @@ export default function Navbar() {
         {/* Compact right-side controls (xl only, 1280-1535px). Only Log In
             so the row fits at common laptop widths. */}
         <div className="hidden xl:flex 2xl:hidden items-center gap-2 shrink-0">
+          <LanguageSwitcher />
           <ThemeToggle />
           <NavLinkSmart
             to={user?.role === "admin" ? "/dashboard" : "/login"}
             className="text-sm font-semibold text-charcoal-700 hover:text-smsorange-500 whitespace-nowrap"
           >
-            {user?.role === "admin" ? "Dashboard" : "Log In"}
+            {user?.role === "admin" ? t('header.dashboard') : t('logIn')}
           </NavLinkSmart>
         </div>
 
@@ -138,14 +167,15 @@ export default function Navbar() {
             to="/contact"
             className="sms-btn-primary !py-2.5 !px-4 whitespace-nowrap"
           >
-            Request a Consultation
+            {t('requestConsultation')}
           </NavLinkSmart>
           <NavLinkSmart
             to={user?.role === "admin" ? "/dashboard" : "/login"}
             className="text-sm font-semibold text-charcoal-700 hover:text-smsorange-500 whitespace-nowrap"
           >
-            {user?.role === "admin" ? "Dashboard" : "Log In"}
+            {user?.role === "admin" ? t('header.dashboard') : t('logIn')}
           </NavLinkSmart>
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
 
@@ -179,7 +209,13 @@ export default function Navbar() {
             <div className="px-4 sm:px-6 lg:px-10 py-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className="text-xs uppercase tracking-[0.2em] font-semibold text-charcoal-500">
-                  Theme
+                  {t('mobileLanguageHeading')}
+                </span>
+                <LanguageSwitcher />
+              </div>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="text-xs uppercase tracking-[0.2em] font-semibold text-charcoal-500">
+                  {t('mobileThemeHeading')}
                 </span>
                 <ThemeToggle />
               </div>
@@ -199,7 +235,7 @@ export default function Navbar() {
                         ].join(" ")
                       }
                     >
-                      <span>{l.label}</span>
+                      <span>{t('nav.' + navKeyFor(l.to))}</span>
                       <ChevronRight className="h-4 w-4 opacity-50" />
                     </NavLinkSmart>
                   </li>
@@ -207,13 +243,13 @@ export default function Navbar() {
               </ul>
               <div className="mt-4 grid gap-2">
                 <NavLinkSmart to="/contact" className="sms-btn-primary justify-center">
-                  Request a Consultation
+                  {t('requestConsultation')}
                 </NavLinkSmart>
                 <NavLinkSmart
                   to={user?.role === "admin" ? "/dashboard" : "/login"}
                   className="sms-btn-ghost justify-center"
                 >
-                  {user?.role === "admin" ? "Dashboard" : "Log In"}
+                  {user?.role === "admin" ? t('header.dashboard') : t('logIn')}
                 </NavLinkSmart>
                 <a
                   href={"tel:" + company.phone.replace(/\\s+/g, "")}

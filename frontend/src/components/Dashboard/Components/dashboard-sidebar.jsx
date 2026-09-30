@@ -4,11 +4,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Inbox, Menu, X, LogOut, Settings, User } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
+import { useLanguage } from "../../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
 export function DashboardSidebar({ unreadCount = 0 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -49,7 +51,7 @@ export function DashboardSidebar({ unreadCount = 0 }) {
             </div>
             <div>
               <h2 className="font-bold text-lg">SMS</h2>
-              <p className="text-xs text-gray-500">Admin Dashboard</p>
+              <p className="text-xs text-gray-500">{t("dashboard.sidebar.adminDashboard")}</p>
             </div>
           </motion.div>
         </div>
@@ -57,7 +59,7 @@ export function DashboardSidebar({ unreadCount = 0 }) {
         <div className="p-4">
           <div className="flex items-center space-x-2 p-2 bg-smsorange-50 text-smsorange-600 rounded-md">
             <Inbox size={18} />
-            <span>Contact Messages</span>
+            <span>{t("dashboard.sidebar.contactMessages")}</span>
             {unreadCount > 0 && (
               <span className="ml-auto bg-[#FF8A00] text-white text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {unreadCount}
@@ -70,18 +72,18 @@ export function DashboardSidebar({ unreadCount = 0 }) {
           <div className="flex flex-col gap-2">
             <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700">
               <User size={18} />
-              <span>Profile</span>
+              <span>{t("dashboard.sidebar.profile")}</span>
             </button>
             <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700">
               <Settings size={18} />
-              <span>Settings</span>
+              <span>{t("dashboard.sidebar.settings")}</span>
             </button>
             <button
               className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700"
               onClick={handleLogout}
             >
               <LogOut size={18} />
-              <span>Logout</span>
+              <span>{t("dashboard.sidebar.logout")}</span>
             </button>
           </div>
         </div>
@@ -96,7 +98,7 @@ export function DashboardSidebar({ unreadCount = 0 }) {
             </div>
             <div>
               <h2 className="font-bold text-lg">SMS</h2>
-              <p className="text-xs text-gray-500">Admin Dashboard</p>
+              <p className="text-xs text-gray-500">{t("dashboard.sidebar.adminDashboard")}</p>
             </div>
           </div>
         </div>
@@ -104,7 +106,7 @@ export function DashboardSidebar({ unreadCount = 0 }) {
         <div className="p-4">
           <div className="flex items-center space-x-2 p-2 bg-[#FF8A00]/10 text-[#FF8A00] rounded-md">
             <Inbox size={18} />
-            <span className="font-medium">Inbox</span>
+            <span className="font-medium">{t("dashboard.sidebar.inbox")}</span>
             {unreadCount > 0 && (
               <span className="ml-auto bg-[#FF8A00] text-white text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {unreadCount}
@@ -117,18 +119,18 @@ export function DashboardSidebar({ unreadCount = 0 }) {
           <div className="flex flex-col gap-2">
             <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700">
               <User size={18} />
-              <span>Profile</span>
+              <span>{t("dashboard.sidebar.profile")}</span>
             </button>
             <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700">
               <Settings size={18} />
-              <span>Settings</span>
+              <span>{t("dashboard.sidebar.settings")}</span>
             </button>
             <button
               className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md text-gray-700"
               onClick={handleLogout}
             >
               <LogOut size={18} />
-              <span>Logout</span>
+              <span>{t("dashboard.sidebar.logout")}</span>
             </button>
           </div>
         </div>

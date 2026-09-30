@@ -4,16 +4,18 @@ import Reveal from "../components/ui/Reveal";
 import CTASection from "../components/ui/CTASection";
 import IconByName from "../components/ui/IconByName";
 import { strategicPlans } from "../data/operations";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function StrategicPlans() {
+  const { t } = useLanguage();
   return (
     <>
-      <PageHero eyebrow="Strategic Plans" title="Where SMS is heading"
-        subtitle="Our strategic plans focus on technology, sustainability, workforce development, and international collaboration."
-        breadcrumbs={[{ label: "Strategic Plans" }]} />
+      <PageHero eyebrow={t("strategicPlans.heroEyebrow")} title={t("strategicPlans.heroTitle")}
+        subtitle={t("strategicPlans.heroSubtitle")}
+        breadcrumbs={[{ label: t("strategicPlans.heroEyebrow") }]} />
       <section className="sms-section bg-white">
         <div className="sms-container">
-          <SectionHeader align="center" eyebrow="Four Strategic Pillars" title="The roadmap that shapes our growth" />
+          <SectionHeader align="center" eyebrow={t("strategicPlans.eyebrow")} title={t("strategicPlans.title")} />
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {strategicPlans.map((p, i) => (
               <Reveal key={p.title} delay={i * 0.05}>
@@ -31,7 +33,7 @@ export default function StrategicPlans() {
           </div>
         </div>
       </section>
-      <CTASection title="Partner with SMS on the future of construction" />
+      <CTASection title={t("strategicPlans.ctaTitle")} />
     </>
   );
 }

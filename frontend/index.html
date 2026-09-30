@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" dir="ltr" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -11,7 +11,7 @@
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <title>SMS — Construction & Engineering Design Company</title>
     <script>
       // Set the theme on <html> BEFORE React paints, so dark-mode users
@@ -29,9 +29,27 @@
         }
       })();
     </script>
+    <script>
+      // Set the language + direction on <html> BEFORE React paints, so
+      // Dari users never see an LTR-flash on page load / refresh.
+      // Mirrors the theme no-flash script above.
+      (function () {
+        try {
+          var saved = window.localStorage.getItem('lang');
+          if (saved !== 'en' && saved !== 'fa') saved = 'en';
+          var dir = (saved === 'fa') ? 'rtl' : 'ltr';
+          document.documentElement.setAttribute('lang', saved);
+          document.documentElement.setAttribute('dir', dir);
+        } catch (e) {
+          document.documentElement.setAttribute('lang', 'en');
+          document.documentElement.setAttribute('dir', 'ltr');
+        }
+      })();
+    </script>
   </head>
   <body class="antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+

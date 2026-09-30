@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import Reveal from "./Reveal";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function PageHero({ eyebrow, title, subtitle, breadcrumbs = [] }) {
+  const { t } = useLanguage();
   return (
     <section className="relative isolate overflow-hidden bg-sms-gradient text-white">
       <div className="absolute inset-0 opacity-30 pointer-events-none"
@@ -10,10 +12,10 @@ export default function PageHero({ eyebrow, title, subtitle, breadcrumbs = [] })
       <div className="sms-container relative py-20 md:py-28">
         {breadcrumbs.length > 0 && (
           <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition">Home</Link>
+            <Link to="/" className="hover:text-white transition">{t("common.breadcrumbHome")}</Link>
             {breadcrumbs.map((b, i) => (
               <span key={i} className="flex items-center gap-2">
-                <ChevronRight className="h-4 w-4 opacity-60" />
+                <ChevronRight className="h-4 w-4 opacity-60 rtl-flip-x" />
                 {b.to ? <Link to={b.to} className="hover:text-white transition">{b.label}</Link> : <span className="text-white">{b.label}</span>}
               </span>
             ))}
