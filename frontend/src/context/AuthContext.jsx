@@ -11,8 +11,9 @@ export const AuthContext = createContext();
 //
 // To override at build time (e.g. for a deployed build pointing at a
 // different API), set `VITE_API_BASE_URL` before running `npm run build`.
-const baseURL = import.meta.env.VITE_API_BASE_URL || "/api/v1";
-
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://construction-website-v4cp.onrender.com/api/v1";
 const api = axios.create({
   baseURL,
   withCredentials: true,

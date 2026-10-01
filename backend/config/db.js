@@ -1,18 +1,26 @@
-const mysql = require('mysql2/promise')
+const dns = require('dns');
+const mongoose = require('mongoose');
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Janzaki007',
-  database: process.env.DB_NAME || 'SparkTrust',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-})
+// Use explicit public DNS servers to resolve MongoDB Atlas SRV records on Windows environments
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
-pool
-  .getConnection()
-  .then(() => console.log('Connected to MySQL database (SparkTrust)'))
-  .catch(err => console.error('Error connecting to MySQL:', err))
+const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    const errorMsg =
+      'FATAL ERROR: MONGODB_URI environment variable is missing. Please set MONGODB_URI in your .env or environment configuration.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
 
-module.exports = pool
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`Connected to MongoDB database (${conn.connection.name})`);
+    return conn;
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err.message);
+    console.log('Retrying MongoDB connection in 5 seconds...');
+    setTimeout(connectDB, 5000);
+  }
+};
+
+module.exports = connectDB;

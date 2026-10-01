@@ -2,7 +2,7 @@
 const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/CatchAsync');
-const pool = require('../config/db');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 // ── Manual admin fallback ─────────────────────────────────────────────────
@@ -74,12 +74,12 @@ const isLocalOrigin = (origin) => {
 
 const signToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d',
   });
 };
 
 const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user.id, user.role);
+  const token = signToken(user._id || user.id, user.role);
   const origin = req.headers.origin || 'no origin';
   const localOrigin = isLocalOrigin(origin);
 
@@ -93,7 +93,7 @@ const createSendToken = (user, statusCode, req, res) => {
 
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + (process.env.JWT_COOKIE_EXPIRES_IN || 90) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
     secure: localOrigin ? false : true,
@@ -110,11 +110,13 @@ const createSendToken = (user, statusCode, req, res) => {
   res.cookie(cookieName, token, cookieOptions);
   console.log('Response headers after setting cookie:', res.getHeaders());
 
-  delete user.password;
+  const userObj = user.toObject ? user.toObject() : { ...user };
+  delete userObj.password;
+
   res.status(statusCode).json({
     status: 'success',
     token,
-    data: { user },
+    data: { user: userObj },
   });
 };
 
@@ -124,53 +126,9 @@ exports.logIn = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide your email and password!', 400));
   }
 
-  // 1) Try MySQL first.
-  let user = null;
-  let dbError = null;
-  try {
-    const [rows] = await pool.execute(
-      'SELECT id, email, name, role, password FROM users WHERE email = ?',
-      [email]
-    );
-    if (rows.length > 0) {
-      const row = rows[0];
-      const correctPassword = await bcrypt.compare(password, row.password);
-      if (!correctPassword) {
-        return next(new AppError('Incorrect email or password!', 401));
-      }
-      user = {
-        id: row.id,
-        email: row.email,
-        name: row.name,
-        role: row.role,
-      };
-    }
-  } catch (err) {
-    // Don't crash the request — save the error and try the env fallback.
-    dbError = err;
-    console.warn(
-      '[logIn] MySQL lookup failed, attempting env-configured admin fallback:',
-      err && err.code ? err.code : err && err.message ? err.message : err
-    );
-  }
-
-  // 2) If MySQL didn't produce a match, try the manual admin (only when
-  //    ADMIN_USERNAME + ADMIN_PASSWORD_HASH are set in config.env).
+  const user = await User.findOne({ email }).select('+password');
   if (!user) {
-    try {
-      const fallback = await tryManualAdmin(email, password);
-      if (fallback) {
-        user = fallback;
-        if (dbError) {
-          console.log(
-            `[logIn] Manual admin fallback SUCCEEDED for "${fallback.email}" ` +
-            `(MySQL reason: ${dbError.code || dbError.message || 'unknown'})`
-          );
-        }
-      }
-    } catch (err) {
-      console.error('[logIn] Manual admin fallback threw:', err);
-    }
+    return next(new AppError('Incorrect email or password!', 401));
   }
 
   if (!user) {
@@ -215,7 +173,7 @@ exports.protect = async (req, res, next) => {
       cookieName = 'jwt_sparktrust';
     }
 
-    if (req.cookies[cookieName]) {
+    if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
       console.log(`Using cookie-based token (${cookieName}):`, token.slice(0, 20) + '...');
     } else if (
@@ -240,35 +198,12 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Decoded token:', decoded);
 
-    // Manual-fallback admin: skip the DB lookup entirely. The id was
-    // minted by `tryManualAdmin()` and the user object it represents
-    // doesn't exist in the `users` table.
-    if (typeof decoded.id === 'string' && decoded.id.startsWith('manual-')) {
-      if (!manualAdminEnabled()) {
-        return next(new AppError(
-          'Manual admin fallback is disabled on this server. Re-login required.',
-          401
-        ));
-      }
-      const username = process.env.ADMIN_USERNAME.trim().toLowerCase();
-      req.user = {
-        id: `manual-${username}`,
-        email: process.env.ADMIN_USERNAME.trim(),
-        name: (process.env.ADMIN_NAME || 'Admin').trim() || 'Admin',
-        role: (process.env.ADMIN_ROLE || 'admin').trim() || 'admin',
-      };
-      return next();
-    }
-
-    const [rows] = await pool.execute(
-      'SELECT id, email, name, role FROM users WHERE id = ?',
-      [decoded.id]
-    );
-    if (rows.length === 0) {
+    const currentUser = await User.findById(decoded.id).select('-password');
+    if (!currentUser) {
       return next(new AppError('The user belonging to this token no longer exists.', 401));
     }
 
-    req.user = rows[0];
+    req.user = currentUser;
     next();
   } catch (err) {
     return next(new AppError(`Invalid token: ${err.message}`, 401));
@@ -276,7 +211,7 @@ exports.protect = async (req, res, next) => {
 };
 
 exports.getMe = catchAsync(async (req, res, next) => {
-  if (!req.user || !req.user.id) {
+  if (!req.user || (!req.user.id && !req.user._id)) {
     return next(new AppError('No authenticated user found.', 401));
   }
   res.status(200).json({
