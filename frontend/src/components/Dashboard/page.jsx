@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { DashboardSidebar } from "./Components/dashboard-sidebar";
 import { ContactCard } from "./Components/contact-card";
 import { ContactDetailModal } from "./Components/contact-detail-modal";
@@ -12,6 +13,7 @@ import { EmptyState } from "./Components/empty-state";
 
 export default function Dashboard() {
   const { api } = useAuth();
+  const { t } = useLanguage();
   const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +26,7 @@ export default function Dashboard() {
       setIsLoading(true);
       const websiteId = "azad_noori";
       try {
-        const res = await api.get(`/messages/${websiteId}`); // Use api instance
+        const res = await api.get(`/messages/${websiteId}`);
         setContacts(
           res.data.data?.map((contact) => ({
             ...contact,
@@ -33,13 +35,14 @@ export default function Dashboard() {
         );
         setError(null);
       } catch (error) {
-        setError("Failed to load contacts. Please try again.");
+        setError(t("dashboard.failedToLoad"));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api]);
 
   const handleOpenContact = async (contact) => {
@@ -48,13 +51,13 @@ export default function Dashboard() {
 
     if (!contact.isRead) {
       try {
-        await api.patch(`/messages/${contact.id}`, { isRead: true }); // Use api instance
+        await api.patch(`/messages/${contact.id}`, { isRead: true });
         const updatedContacts = contacts.map((c) =>
           c.id === contact.id ? { ...c, isRead: true } : c
         );
         setContacts(updatedContacts);
       } catch (error) {
-        alert("Failed to mark message as read.");
+        alert(t("dashboard.failedToMarkRead"));
       }
     }
   };
@@ -86,10 +89,10 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-0"
             >
-              Inbox
+              {t("dashboard.title")}
               {unreadCount > 0 && (
                 <span className="ml-2 bg-[#FF8A00] text-white text-xs font-medium px-2.5 py-0.5 rounded-full">
-                  {unreadCount} new
+                  {t("dashboard.newBadge", unreadCount)}
                 </span>
               )}
             </motion.h1>
@@ -101,7 +104,7 @@ export default function Dashboard() {
               />
               <input
                 type="text"
-                placeholder="Search contacts..."
+                placeholder={t("dashboard.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8A00] focus:border-transparent"
@@ -139,16 +142,16 @@ export default function Dashboard() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <p className="text-gray-600 mt-2">Loading contacts...</p>
+              <p className="text-gray-600 mt-2">{t("dashboard.loading")}</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-500">{error}</p>
               <button
-                onClick={() => fetchData()}
+                onClick={() => window.location.reload()}
                 className="mt-4 px-4 py-2 bg-[#FF8A00] text-white rounded-lg"
               >
-                Retry
+                {t("dashboard.retry")}
               </button>
             </div>
           ) : filteredContacts.length > 0 ? (

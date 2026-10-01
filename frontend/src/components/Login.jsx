@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import axios from "axios";
 
 export default function AdminLogin() {
@@ -15,17 +16,18 @@ export default function AdminLogin() {
   const [errors, setErrors] = useState({});
 
   const { setUser, fetchUser, api } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
     if (!email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("login.errEmailRequired");
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t("login.errEmailInvalid");
     }
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("login.errPasswordRequired");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -62,7 +64,7 @@ const handleSubmit = async (e) => {
     setIsLoading(false);
     const errorMessage =
       error.response?.data?.message ||
-      "An unexpected error occurred. Please try again.";
+      t("login.errGeneric");
     console.error("Login error:", error.response?.data || error.message);
     setErrors({ ...errors, general: errorMessage });
   }
@@ -102,10 +104,10 @@ const handleSubmit = async (e) => {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="mt-6 text-center text-3xl font-bold text-gray-900"
         >
-          Admin Access
+          {t("login.title")}
         </motion.h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Secure login for authorized personnel only
+          {t("login.subtitle")}
         </p>
       </div>
 
@@ -119,7 +121,7 @@ const handleSubmit = async (e) => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                {t("login.emailLabel")}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -135,7 +137,7 @@ const handleSubmit = async (e) => {
                   className={`block w-full pl-10 pr-3 py-2 border ${
                     errors.email ? "border-red-300" : "border-gray-300"
                   } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-smsorange-400 focus:border-smsorange-400 sm:text-sm`}
-                  placeholder="admin@company.com"
+                  placeholder={t("login.emailPlaceholder")}
                 />
               </div>
               {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
@@ -143,7 +145,7 @@ const handleSubmit = async (e) => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                {t("login.passwordLabel")}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -208,7 +210,7 @@ const handleSubmit = async (e) => {
                     ></path>
                   </svg>
                 ) : (
-                  "Sign in"
+                  t("login.submitButton")
                 )}
               </motion.button>
             </div>
@@ -216,7 +218,7 @@ const handleSubmit = async (e) => {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              This is a secure area for authorized personnel only. Unauthorized access is prohibited.
+              {t("login.footerNotice")}
             </p>
           </div>
         </motion.div>

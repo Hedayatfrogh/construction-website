@@ -1,4 +1,5 @@
 // Home page composition — preserves the import path used by App.jsx (`./components/Slider`)
+import { useLanguage } from "../context/LanguageContext";
 import Hero from "./home/Hero";
 import Stats from "./home/Stats";
 import ServicesGrid from "./home/ServicesGrid";
@@ -13,6 +14,7 @@ import Clients from "./home/Clients";
 import CTASection from "./ui/CTASection";
 
 export default function Slider() {
+  const { t } = useLanguage();
   return (
     <main>
       <Hero />
@@ -27,8 +29,8 @@ export default function Slider() {
       <Upcoming />
       <Clients />
       <CTASection
-        title="Let's plan your next construction or engineering project."
-        subtitle="Whether a high-rise building, infrastructure corridor, irrigation scheme, or solar installation — SMS brings the engineering, equipment, and people to deliver it."
+        title={t('home.ctaTitle')}
+        subtitle={t('home.ctaSubtitle')}
       />
     </main>
   );

@@ -8,10 +8,10 @@ export default defineConfig({
     // Listen on all network interfaces (0.0.0.0) so the dev server is
     // reachable from other devices on the same Wi-Fi / LAN.
     host: '0.0.0.0',
-    port: 5173,
+    port: 5175,
     strictPort: true,
     // Allow any host header (so phones / other PCs hitting
-    // http://<your-laptop-ip>:5173 aren't blocked by Vite's host check).
+    // http://<your-laptop-ip>:5175 aren't blocked by Vite's host check).
     allowedHosts: true,
     // Proxy API requests to the local backend. Using a relative path
     // (`/api`) means the same frontend bundle works whether you open it

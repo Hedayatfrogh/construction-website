@@ -5,11 +5,13 @@ import PageHero from "../components/ui/PageHero";
 import Reveal from "../components/ui/Reveal";
 import { company } from "../data/company";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const initialForm = { fullName: "", email: "", phone: "", company: "", subject: "", message: "" };
 
 export default function Contact() {
   const { api } = useAuth();
+  const { t } = useLanguage();
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ kind: "idle", text: "" });
@@ -18,10 +20,10 @@ export default function Contact() {
 
   const validate = () => {
     const e = {};
-    if (!form.fullName.trim()) e.fullName = "Full name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Email is invalid";
-    if (!form.message.trim() || form.message.trim().length < 10) e.message = "Message must be at least 10 characters";
+    if (!form.fullName.trim()) e.fullName = t("contact.errFullName");
+    if (!form.email.trim()) e.email = t("contact.errEmailRequired");
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = t("contact.errEmailInvalid");
+    if (!form.message.trim() || form.message.trim().length < 10) e.message = t("contact.errMessage");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -33,10 +35,10 @@ export default function Contact() {
     setStatus({ kind: "idle", text: "" });
     try {
       await api.post("/contact", form).catch(() => null);
-      setStatus({ kind: "success", text: "Thank you. Your message has been received — our team will respond shortly." });
+      setStatus({ kind: "success", text: t("contact.successMessage") });
       setForm(initialForm);
     } catch {
-      setStatus({ kind: "error", text: "Something went wrong sending your message. Please try again." });
+      setStatus({ kind: "error", text: t("contact.errorMessage") });
     } finally { setSubmitting(false); }
   };
 
@@ -87,35 +89,35 @@ export default function Contact() {
 
           <Reveal delay={0.05}>
             <form onSubmit={onSubmit} className="rounded-2xl bg-white border border-charcoal-100 shadow-sms-soft p-7">
-              <h2 className="font-display text-2xl font-bold text-charcoal-900">Send us a message</h2>
-              <p className="mt-2 text-sm text-charcoal-500">Fill out the form below and our team will get back to you.</p>
+              <h2 className="font-display text-2xl font-bold text-charcoal-900">{t("contact.formTitle")}</h2>
+              <p className="mt-2 text-sm text-charcoal-500">{t("contact.formSubtitle")}</p>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="fullName">Full Name</label>
-                  <input id="fullName" value={form.fullName} onChange={update("fullName")} placeholder="Your full name" className={inputCls(errors.fullName)} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="fullName">{t("contact.fullName")}</label>
+                  <input id="fullName" value={form.fullName} onChange={update("fullName")} placeholder={t("contact.fullNamePlaceholder")} className={inputCls(errors.fullName)} />
                   {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="email">Email</label>
-                  <input id="email" type="email" value={form.email} onChange={update("email")} placeholder="you@example.com" className={inputCls(errors.email)} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="email">{t("contact.email")}</label>
+                  <input id="email" type="email" value={form.email} onChange={update("email")} placeholder={t("contact.emailPlaceholder")} className={inputCls(errors.email)} />
                   {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="phone">Phone</label>
-                  <input id="phone" value={form.phone} onChange={update("phone")} placeholder="+93 ..." className={inputCls()} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="phone">{t("contact.phone")}</label>
+                  <input id="phone" value={form.phone} onChange={update("phone")} placeholder={t("contact.phonePlaceholder")} className={inputCls()} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="company">Company / Organization</label>
-                  <input id="company" value={form.company} onChange={update("company")} placeholder="Optional" className={inputCls()} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="company">{t("contact.company")}</label>
+                  <input id="company" value={form.company} onChange={update("company")} placeholder={t("contact.companyPlaceholder")} className={inputCls()} />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="subject">Subject</label>
-                  <input id="subject" value={form.subject} onChange={update("subject")} placeholder="What is this about?" className={inputCls()} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="subject">{t("contact.subject")}</label>
+                  <input id="subject" value={form.subject} onChange={update("subject")} placeholder={t("contact.subjectPlaceholder")} className={inputCls()} />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="message">Message</label>
-                  <textarea id="message" rows={5} value={form.message} onChange={update("message")} placeholder="Tell us about your project..." className={inputCls(errors.message)} />
+                  <label className="block text-sm font-semibold text-charcoal-800" htmlFor="message">{t("contact.message")}</label>
+                  <textarea id="message" rows={5} value={form.message} onChange={update("message")} placeholder={t("contact.messagePlaceholder")} className={inputCls(errors.message)} />
                   {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message}</p>}
                 </div>
               </div>
@@ -133,7 +135,7 @@ export default function Contact() {
               </AnimatePresence>
 
               <button type="submit" disabled={submitting} className="sms-btn-primary mt-6 w-full justify-center disabled:opacity-50">
-                {submitting ? "Sending…" : (<>Send Message <Send className="h-4 w-4" /></>)}
+                {submitting ? t("common.sending") : (<>{t("contact.sendButton")} <Send className="h-4 w-4" /></>)}
               </button>
             </form>
           </Reveal>

@@ -4,16 +4,18 @@ import Reveal from "../components/ui/Reveal";
 import CTASection from "../components/ui/CTASection";
 import IconByName from "../components/ui/IconByName";
 import { expansionGoals } from "../data/operations";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ExpansionGoals() {
+  const { t } = useLanguage();
   return (
     <>
-      <PageHero eyebrow="Expansion Goals" title="Where we are growing"
-        subtitle="SMS is investing in geographical growth, service diversification, capacity enhancement, and public-private partnerships."
-        breadcrumbs={[{ label: "Expansion Goals" }]} />
+      <PageHero eyebrow={t("expansionGoals.heroEyebrow")} title={t("expansionGoals.heroTitle")}
+        subtitle={t("expansionGoals.heroSubtitle")}
+        breadcrumbs={[{ label: t("expansionGoals.heroEyebrow") }]} />
       <section className="sms-section bg-white">
         <div className="sms-container">
-          <SectionHeader align="center" eyebrow="Four Pillars of Expansion" title="How we scale to serve Afghanistan's development" />
+          <SectionHeader align="center" eyebrow={t("expansionGoals.eyebrow")} title={t("expansionGoals.title")} />
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {expansionGoals.map((g, i) => (
               <Reveal key={g.title} delay={i * 0.05}>
@@ -29,7 +31,7 @@ export default function ExpansionGoals() {
           </div>
         </div>
       </section>
-      <CTASection title="Invest or partner with SMS" subtitle="Discuss expansion and partnership opportunities with our leadership." />
+      <CTASection title={t("expansionGoals.ctaTitle")} subtitle={t("expansionGoals.ctaSubtitle")} />
     </>
   );
 }

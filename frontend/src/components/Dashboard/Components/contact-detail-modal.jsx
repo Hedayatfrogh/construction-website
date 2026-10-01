@@ -4,8 +4,10 @@ import { useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Mail, Building, Calendar, User } from "lucide-react"
 import { format } from "date-fns"
+import { useLanguage } from "../../../context/LanguageContext"
 
 export function ContactDetailModal({ isOpen, contact, onClose }) {
+  const { t } = useLanguage();
   // Close modal on escape key
   useEffect(() => {
     const handleEsc = (e) => {
@@ -53,7 +55,7 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
           >
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
               <div className="flex justify-between items-center p-4 md:p-6 border-b">
-                <h2 className="text-lg md:text-xl font-bold text-gray-800">Contact Details</h2>
+                <h2 className="text-lg md:text-xl font-bold text-gray-800">{t("dashboard.modal.title")}</h2>
                 <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
                   <X size={20} />
                 </button>
@@ -81,24 +83,24 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
 
                     <div className="flex items-center text-gray-600 justify-center md:justify-start">
                       <Calendar size={16} className="mr-2" />
-                      <span>Submitted on {format(new Date(contact.createdAt), "MMMM d, yyyy 'at' h:mm a")}</span>
+                      <span>{t("dashboard.modal.submittedOn", format(new Date(contact.createdAt), "MMMM d, yyyy 'at' h:mm a"))}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                  <h4 className="font-medium text-gray-700 mb-2">Message</h4>
+                  <h4 className="font-medium text-gray-700 mb-2">{t("dashboard.modal.message")}</h4>
                   <p className="text-gray-600 whitespace-pre-line">{contact.description}</p>
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-700 mb-3">Additional Information</h4>
+                  <h4 className="font-medium text-gray-700 mb-3">{t("dashboard.modal.additionalInfo")}</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start">
                       <User size={16} className="mr-2 mt-0.5 text-gray-400" />
                       <div>
-                        <p className="text-sm text-gray-500">Full Name</p>
+                        <p className="text-sm text-gray-500">{t("dashboard.modal.fullName")}</p>
                         <p className="text-gray-700">
                           {contact.firstName} {contact.lastName}
                         </p>
@@ -108,7 +110,7 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
                     <div className="flex items-start">
                       <Building size={16} className="mr-2 mt-0.5 text-gray-400" />
                       <div>
-                        <p className="text-sm text-gray-500">Company</p>
+                        <p className="text-sm text-gray-500">{t("dashboard.modal.company")}</p>
                         <p className="text-gray-700">{contact.company}</p>
                       </div>
                     </div>
@@ -116,7 +118,7 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
                     <div className="flex items-start">
                       <Mail size={16} className="mr-2 mt-0.5 text-gray-400" />
                       <div>
-                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="text-sm text-gray-500">{t("dashboard.modal.email")}</p>
                         <p className="text-gray-700">{contact.email}</p>
                       </div>
                     </div>
@@ -124,7 +126,7 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
                     <div className="flex items-start">
                       <Calendar size={16} className="mr-2 mt-0.5 text-gray-400" />
                       <div>
-                        <p className="text-sm text-gray-500">Submission Date</p>
+                        <p className="text-sm text-gray-500">{t("dashboard.modal.submissionDate")}</p>
                         <p className="text-gray-700">{format(new Date(contact.createdAt), "PPP")}</p>
                       </div>
                     </div>
@@ -137,10 +139,10 @@ export function ContactDetailModal({ isOpen, contact, onClose }) {
                   onClick={onClose}
                   className="px-3 py-1.5 md:px-4 md:py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
-                  Close
+                  {t("dashboard.modal.close")}
                 </button>
                 <button className="px-3 py-1.5 md:px-4 md:py-2 bg-[#FF8A00] text-white rounded-lg hover:bg-[#FF8A00]/90">
-                  Mark as Handled
+                  {t("dashboard.modal.markHandled")}
                 </button>
               </div>
             </div>

@@ -2,13 +2,15 @@ import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { company } from "../../data/company";
 import SectionHeader from "../ui/SectionHeader";
 import Reveal from "../ui/Reveal";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ContactStrip() {
+  const { t } = useLanguage();
   const items = [
-    { icon: Phone,  label: "Call Us",     value: company.phone,                href: `tel:${company.phone.replace(/\s+/g, "")}` },
-    { icon: Mail,   label: "Email",       value: company.email || "Add via Admin", href: company.email ? `mailto:${company.email}` : null },
-    { icon: MapPin, label: "Kabul Office",value: company.offices.main,         href: null },
-    { icon: MapPin, label: "Nangarhar Office", value: company.offices.branch,  href: null },
+    { icon: Phone,  label: t("home.contactCallUs"),            value: company.phone,                                       href: `tel:${company.phone.replace(/\s+/g, "")}` },
+    { icon: Mail,   label: t("home.contactEmail"),             value: company.email || t("home.contactEmailPlaceholder"), href: company.email ? `mailto:${company.email}` : null },
+    { icon: MapPin, label: t("home.contactKabulOffice"),       value: company.offices.main,                                href: null },
+    { icon: MapPin, label: t("home.contactNangarharOffice"),   value: company.offices.branch,                               href: null },
   ];
   return (
     <section className="bg-white">
