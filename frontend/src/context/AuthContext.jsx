@@ -1,4 +1,3 @@
-// AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import api, { clearAccessToken, setAccessToken } from "../api";
 
@@ -50,11 +49,13 @@ export const AuthProvider = ({ children }) => {
     const res = await api.post("/users/login", credentials);
     const token = res.data?.token;
     const authenticatedUser = res.data?.data?.user;
+
     if (!token || authenticatedUser?.role !== "admin") {
       throw new Error(
         "The server did not return a valid administrator session.",
       );
     }
+
     setAccessToken(token);
     setUser(authenticatedUser);
     setIsLoading(false);

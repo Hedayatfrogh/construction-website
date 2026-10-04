@@ -241,21 +241,19 @@ exports.createUser = catchAsync(async (req, res, next) => {
     "INSERT INTO users (name, email, role, password, is_active, is_super_admin) VALUES (?, ?, 'admin', ?, 1, 0)",
     [name.trim(), normalizedEmail, hash],
   );
-  res
-    .status(201)
-    .json({
-      status: "success",
-      data: {
-        user: {
-          id: result.insertId,
-          name: name.trim(),
-          email: normalizedEmail,
-          role: "admin",
-          is_active: 1,
-          is_super_admin: 0,
-        },
+  res.status(201).json({
+    status: "success",
+    data: {
+      user: {
+        id: result.insertId,
+        name: name.trim(),
+        email: normalizedEmail,
+        role: "admin",
+        is_active: 1,
+        is_super_admin: 0,
       },
-    });
+    },
+  });
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {

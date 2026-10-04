@@ -1,5 +1,4 @@
-// authController.js
-const AppError = require("../utils/AppError");
+﻿const AppError = require("../utils/AppError");
 const jwt = require("jsonwebtoken");
 const catchAsync = require("../utils/CatchAsync");
 const pool = require("../config/db");
@@ -7,16 +6,36 @@ const bcrypt = require("bcryptjs");
 const { createHash, randomBytes } = require("crypto");
 const nodemailer = require("nodemailer");
 
-// Helper: is the request coming from a local / LAN context? (plain HTTP,
-// no TLS, so we must NOT use `Secure` cookies and should use `Lax` for
-// `SameSite` so the cookie is sent on cross-origin requests from the LAN).
+const manualAdminEnabled = () => {
+  const username = (process.env.ADMIN_USERNAME || "").trim();
+  const hash = (process.env.ADMIN_PASSWORD_HASH || "").trim();
+  return Boolean(username && hash);
+};
+
+const tryManualAdmin = async (email, password) => {
+  if (!manualAdminEnabled()) return null;
+  const username = process.env.ADMIN_USERNAME.trim().toLowerCase();
+  if (email.trim().toLowerCase() !== username) return null;
+
+  try {
+    const ok = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH.trim());
+    if (!ok) return null;
+    return {
+      id: `manual-${username}`,
+      email: process.env.ADMIN_USERNAME.trim(),
+      name: (process.env.ADMIN_NAME || "Admin").trim() || "Admin",
+      role: (process.env.ADMIN_ROLE || "admin").trim() || "admin",
+      is_super_admin: 1,
+    };
+  } catch (_) {
+    return null;
+  }
+};
+
 const isLocalOrigin = (origin) => {
-  if (!origin) return true; // no Origin header (e.g. curl)
+  if (!origin) return true;
   if (origin.includes("localhost") || origin.includes("127.0.0.1")) return true;
-  // RFC1918 IPv4 private ranges
-  const m = origin.match(
-    /https?:\/\/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/,
-  );
+  const m = origin.match(/https?:\/\/((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}))/);
   if (m) {
     const a = Number(m[1]);
     const b = Number(m[2]);
@@ -25,7 +44,6 @@ const isLocalOrigin = (origin) => {
     if (a === 192 && b === 168) return true;
     if (a === 127) return true;
   }
-  // IPv6 loopback / link-local / unique-local
   if (origin.includes("://[::1]")) return true;
   if (origin.includes("://[fe80")) return true;
   if (origin.includes("://[fc") || origin.includes("://[fd")) return true;
@@ -47,7 +65,6 @@ const createSendToken = (user, statusCode, req, res) => {
   const origin = req.headers.origin || "no origin";
   const localOrigin = isLocalOrigin(origin);
 
-  // Determine cookie name based on origin
   let cookieName = "jwt";
   if (origin.includes("azadnoori.com")) {
     cookieName = "jwt_azadnoori";
@@ -70,13 +87,15 @@ const createSendToken = (user, statusCode, req, res) => {
 
   res.cookie(cookieName, token, cookieOptions);
 
-  delete user.password;
-  delete user.tokenVersion;
-  delete user.token_version;
+  const userObj = { ...user };
+  delete userObj.password;
+  delete userObj.tokenVersion;
+  delete userObj.token_version;
+
   res.status(statusCode).json({
     status: "success",
     token,
-    data: { user },
+    data: { user: userObj },
   });
 };
 
@@ -90,33 +109,45 @@ exports.logIn = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("Please provide your email and password!", 400));
   }
+
   const normalizedEmail = email.trim().toLowerCase();
 
   let rows;
   try {
-    [
-      rows,
-    ] = await pool.execute(
+    [rows] = await pool.execute(
       "SELECT id, email, name, role, password, is_active, is_super_admin, token_version FROM users WHERE LOWER(email) = ?",
       [normalizedEmail],
     );
   } catch (err) {
     console.error("[logIn] MySQL lookup failed:", err.code || "database error");
-    return next(
-      new AppError(
-        "Login is temporarily unavailable because the database could not be reached.",
-        503,
-      ),
-    );
+    const manualUser = await tryManualAdmin(normalizedEmail, password);
+    if (!manualUser) {
+      return next(
+        new AppError(
+          "Login is temporarily unavailable because the database could not be reached.",
+          503,
+        ),
+      );
+    }
+
+    return createSendToken({ ...manualUser, tokenVersion: 0 }, 200, req, res);
   }
 
   const row = rows[0];
-  if (
-    !row ||
-    row.role !== "admin" ||
-    Number(row.is_active) !== 1 ||
-    !(await bcrypt.compare(password, row.password))
-  ) {
+  if (!row || row.role !== "admin" || Number(row.is_active) !== 1) {
+    const manualUser = await tryManualAdmin(normalizedEmail, password);
+    if (manualUser) {
+      return createSendToken({ ...manualUser, tokenVersion: 0 }, 200, req, res);
+    }
+    return next(new AppError("Invalid email or password.", 401));
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, row.password);
+  if (!isPasswordValid) {
+    const manualUser = await tryManualAdmin(normalizedEmail, password);
+    if (manualUser) {
+      return createSendToken({ ...manualUser, tokenVersion: 0 }, 200, req, res);
+    }
     return next(new AppError("Invalid email or password.", 401));
   }
 
@@ -185,13 +216,11 @@ exports.protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const [
-      rows,
-    ] = await pool.execute(
+    const [rows] = await pool.execute(
       "SELECT id, email, name, role, is_active, is_super_admin, token_version FROM users WHERE id = ?",
       [decoded.id],
     );
+
     if (rows.length === 0 || Number(rows[0].is_active) !== 1) {
       return next(
         new AppError("The user belonging to this token no longer exists.", 401),
@@ -219,6 +248,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
   if (!req.user || !req.user.id) {
     return next(new AppError("No authenticated user found.", 401));
   }
+
   res.status(200).json({
     status: "success",
     data: {
@@ -248,24 +278,25 @@ exports.changePassword = catchAsync(async (req, res, next) => {
       ),
     );
   }
-  const [[user]] = await pool.execute(
-    "SELECT password FROM users WHERE id = ?",
-    [req.user.id],
-  );
+
+  const [[user]] = await pool.execute("SELECT password FROM users WHERE id = ?", [
+    req.user.id,
+  ]);
   if (!user || !(await bcrypt.compare(currentPassword, user.password))) {
     return next(new AppError("Current password is incorrect.", 401));
   }
+
   const hash = await bcrypt.hash(newPassword, 12);
   await pool.execute(
     "UPDATE users SET password = ?, token_version = token_version + 1 WHERE id = ?",
     [hash, req.user.id],
   );
-  const [
-    [updatedUser],
-  ] = await pool.execute(
+
+  const [[updatedUser]] = await pool.execute(
     "SELECT id, email, name, role, is_super_admin, token_version FROM users WHERE id = ?",
     [req.user.id],
   );
+
   createSendToken(
     { ...updatedUser, tokenVersion: updatedUser.token_version },
     200,
@@ -283,32 +314,29 @@ exports.forgotPassword = catchAsync(async (req, res) => {
       : "";
   const smtpReady =
     process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS;
+
   if (!email) {
-    return res
-      .status(400)
-      .json({ status: "fail", message: "Email is required." });
+    return res.status(400).json({ status: "fail", message: "Email is required." });
   }
   if (!smtpReady) {
     return res.status(503).json({
       status: "error",
-      message:
-        "Password recovery is not configured. Contact the site administrator.",
+      message: "Password recovery is not configured. Contact the site administrator.",
     });
   }
-  const [
-    users,
-  ] = await pool.execute(
+
+  const [users] = await pool.execute(
     "SELECT id, email FROM users WHERE LOWER(email) = ? AND role = 'admin' AND is_active = 1 LIMIT 1",
     [email],
   );
-  if (!users.length)
+  if (!users.length) {
     return res.status(200).json({ status: "success", message: genericMessage });
+  }
 
   const rawToken = randomBytes(32).toString("hex");
-  const tokenHash = createHash("sha256")
-    .update(rawToken)
-    .digest("hex");
+  const tokenHash = createHash("sha256").update(rawToken).digest("hex");
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
   await pool.execute(
     "DELETE FROM password_resets WHERE user_id = ? AND used_at IS NULL",
     [String(users[0].id)],
@@ -327,8 +355,7 @@ exports.forgotPassword = catchAsync(async (req, res) => {
     });
     const resetUrl = new URL(
       "/reset-password",
-      process.env.FRONTEND_URL ||
-        "https://construction-website-xi-ten.vercel.app",
+      process.env.FRONTEND_URL || "https://construction-website-xi-ten.vercel.app",
     );
     resetUrl.searchParams.set("token", rawToken);
     await transport.sendMail({
@@ -338,14 +365,10 @@ exports.forgotPassword = catchAsync(async (req, res) => {
       text: `Use this one-time link within 30 minutes to reset your password: ${resetUrl.toString()}`,
     });
   } catch (error) {
-    await pool.execute("DELETE FROM password_resets WHERE token_hash = ?", [
-      tokenHash,
-    ]);
-    console.error(
-      "Password reset email delivery failed:",
-      error.code || "mail error",
-    );
+    await pool.execute("DELETE FROM password_resets WHERE token_hash = ?", [tokenHash]);
+    console.error("Password reset email delivery failed:", error.code || "mail error");
   }
+
   res.status(200).json({ status: "success", message: genericMessage });
 });
 
@@ -364,10 +387,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
       ),
     );
   }
-  const tokenHash = createHash("sha256")
-    .update(token)
-    .digest("hex");
+
+  const tokenHash = createHash("sha256").update(token).digest("hex");
   const connection = await pool.getConnection();
+
   try {
     await connection.beginTransaction();
     const [resets] = await connection.execute(
@@ -377,12 +400,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
          AND u.role = 'admin' AND u.is_active = 1 FOR UPDATE`,
       [tokenHash],
     );
+
     if (!resets.length) {
       await connection.rollback();
       return next(
         new AppError("This password reset link is invalid or expired.", 400),
       );
     }
+
     const passwordHash = await bcrypt.hash(newPassword, 12);
     await connection.execute(
       "UPDATE users SET password = ?, token_version = token_version + 1 WHERE id = ?",
@@ -399,9 +424,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   } finally {
     connection.release();
   }
-  res
-    .status(200)
-    .json({ status: "success", message: "Password reset successfully." });
+
+  res.status(200).json({ status: "success", message: "Password reset successfully." });
 });
 
 exports.restrictTo = (...roles) => {

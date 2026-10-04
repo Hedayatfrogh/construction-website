@@ -1,4 +1,3 @@
-// app.js
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -13,10 +12,13 @@ const adminController = require("./Controllers/adminController");
 const MessageRouter = require("./Routers/messageRouter");
 const usersRouter = require("./Routers/usersRouter");
 const adminRouter = require("./Routers/adminRouter");
+const provincesRouter = require("./Routers/provincesRouter");
+const categoriesRouter = require("./Routers/categoriesRouter");
+const companiesRouter = require("./Routers/companiesRouter");
+const advertisementsRouter = require("./Routers/advertisementsRouter");
 
 const app = express();
 
-// Define allowed origins (production + local development)
 const allowedOrigins = [
   "https://sparktrust.tech",
   "https://www.sparktrust.tech",
@@ -33,9 +35,6 @@ const allowedOrigins = [
   "http://127.0.0.1:5175",
 ];
 
-// Helper: returns true when the origin URL points at a private LAN address
-// (RFC1918 ranges). This lets any phone / laptop on the same Wi-Fi / LAN
-// connect to the API without having to hard-code every IP here.
 const isPrivateLanOrigin = (origin) => {
   if (!origin) return false;
   let host;
@@ -44,35 +43,33 @@ const isPrivateLanOrigin = (origin) => {
   } catch (_) {
     return false;
   }
-  // Strip IPv6 brackets if present
+
   const cleaned = host.replace(/^\[|\]$/g, "");
-  // IPv4 private ranges
   const m = cleaned.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (m) {
     const [, a, b] = m.map(Number);
-    if (a === 10) return true; // 10.0.0.0/8
-    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
-    if (a === 192 && b === 168) return true; // 192.168.0.0/16
-    if (a === 127) return true; // 127.0.0.0/8 (loopback)
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 127) return true;
     return false;
   }
-  // IPv6 loopback / link-local / unique-local
+
   if (cleaned === "::1") return true;
-  if (cleaned.startsWith("fe80:")) return true; // link-local
-  if (cleaned.startsWith("fc") || cleaned.startsWith("fd")) return true; // ULA
-  // Hostname-based "localhost"
+  if (cleaned.startsWith("fe80:")) return true;
+  if (cleaned.startsWith("fc") || cleaned.startsWith("fd")) return true;
   if (cleaned === "localhost") return true;
+
   return false;
 };
 
 const isOriginAllowed = (origin) => {
-  if (!origin) return true; // same-origin / curl / server-to-server
+  if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
   if (isPrivateLanOrigin(origin)) return true;
   return false;
 };
 
-// CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -91,7 +88,6 @@ app.use(
   }),
 );
 
-// Handle CORS preflight requests
 app.options(
   "*",
   cors({
@@ -112,23 +108,13 @@ app.options(
   }),
 );
 
-// Cookie Parser
 app.use(cookieParser());
-
-// Security Headers
 app.use(helmet());
-
-// Parse JSON
 app.use(express.json());
-
-// Prevent HTTP parameter pollution & XSS
 app.use(hpp());
 app.use(xss());
-
-// Logger
 app.use(morgan("dev"));
 
-// Static files
 app.use(
   "/Uploads",
   express.static(path.join(__dirname, "Uploads"), {
@@ -141,18 +127,22 @@ app.use(
 
 app.use("/api/v1/messages", MessageRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/provinces", provincesRouter);
+app.use("/api/v1/categories", categoriesRouter);
+app.use("/api/v1/companies", companiesRouter);
+app.use("/api/v1/advertisements", advertisementsRouter);
 app.get("/api/v1/content", adminController.getPublicContent);
 app.use("/api/v1/admin", adminRouter);
 
-// Global error handler
 app.use(globalErrorHandler);
 
-// 404 fallback
 app.use("*", (req, res) => {
   res.status(404).json({
     status: "Fail",
     message: `Can't find ${req.originalUrl}`,
   });
 });
+
+module.exports = app;
 
 module.exports = app;
