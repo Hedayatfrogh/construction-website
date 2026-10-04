@@ -17,11 +17,27 @@
 
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, MessageSquare, FolderKanban, Users, Briefcase,
-  Newspaper, Wrench, Building2, ImageIcon, Settings, LogOut, Globe,
-  ChevronDown, Menu, X,
+  LayoutDashboard,
+  MessageSquare,
+  FolderKanban,
+  Users,
+  Briefcase,
+  Newspaper,
+  Wrench,
+  Building2,
+  ImageIcon,
+  Settings,
+  LogOut,
+  Globe,
+  ChevronDown,
+  Menu,
+  X,
+  Leaf,
+  ClipboardList,
+  CalendarDays,
+  Contact,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { hasOverrides, resetAllOverrides } from "../data/contentStore";
@@ -32,16 +48,32 @@ const ADMIN_STRINGS = {
   en: {
     brand: "SMS · Admin Panel",
     nav: {
-      overview: "Overview", messages: "Contact Messages",
-      projects: "Projects", team: "Team Members", clients: "Clients",
-      news: "News & Insights", jobs: "Careers",
-      services: "Services", equipment: "Equipment",
-      media: "Media Library", settings: "Settings",
-      siteContent: "Site Content", homepage: "Homepage",
+      dashboard: "Dashboard",
+      messages: "Contact Messages",
+      company: "Company",
+      about: "About",
+      projects: "Projects",
+      team: "Our Workforce",
+      clients: "Clients",
+      jobs: "Careers",
+      news: "News & Insights",
+      services: "Services",
+      equipment: "Equipment & Machinery",
+      sustainability: "Sustainability",
+      methodology: "Our Methodology",
+      upcoming: "Upcoming & Planned",
+      contact: "Contact",
+      media: "Media Library",
+      settings: "Website Settings",
+      users: "Admin Users",
+      siteContent: "Website content",
+      homepage: "Homepage",
     },
-    user: "Administrator", logout: "Log out",
+    user: "Administrator",
+    logout: "Logout",
     resetAll: "Reset all CMS overrides",
-    confirmReset: "This will wipe every admin override and restore the static defaults. Continue?",
+    confirmReset:
+      "This will wipe every admin override and restore the static defaults. Continue?",
     overridesActive: "CMS overrides active",
     overridesNone: "All content is static (no admin overrides)",
     backToSite: "← Back to site",
@@ -49,16 +81,32 @@ const ADMIN_STRINGS = {
   fa: {
     brand: "SMS · پنل مدیر",
     nav: {
-      overview: "نمای کلی", messages: "پیام‌های تماس",
-      projects: "پروژه‌ها", team: "اعضای تیم", clients: "مشتریان",
-      news: "اخبار و بینش‌ها", jobs: "فرصت‌های شغلی",
-      services: "خدمات", equipment: "تجهیزات",
-      media: "کتابخانه رسانه", settings: "تنظیمات",
-      siteContent: "محتوای سایت", homepage: "صفحه اصلی",
+      dashboard: "داشبورد",
+      messages: "پیام‌های تماس",
+      company: "شرکت",
+      about: "درباره ما",
+      projects: "پروژه‌ها",
+      team: "نیروی کار ما",
+      clients: "مشتریان",
+      jobs: "فرصت‌های شغلی",
+      news: "اخبار و بینش‌ها",
+      services: "خدمات",
+      equipment: "تجهیزات و ماشین‌آلات",
+      sustainability: "پایداری",
+      methodology: "روش‌شناسی ما",
+      upcoming: "آینده و برنامه‌ریزی‌شده",
+      contact: "تماس",
+      media: "کتابخانه رسانه",
+      settings: "تنظیمات وب‌سایت",
+      users: "مدیران",
+      siteContent: "محتوای وب‌سایت",
+      homepage: "صفحه اصلی",
     },
-    user: "مدیر", logout: "خروج",
+    user: "مدیر",
+    logout: "خروج",
     resetAll: "بازنشانی همه تغییرات مدیر",
-    confirmReset: "این عمل همه تغییرات مدیر را پاک کرده و محتوای پیش‌فرض را بازمی‌گرداند. ادامه دهید؟",
+    confirmReset:
+      "این عمل همه تغییرات مدیر را پاک کرده و محتوای پیش‌فرض را بازمی‌گرداند. ادامه دهید؟",
     overridesActive: "تغییرات مدیر فعال است",
     overridesNone: "همه محتوا ایستا است (بدون تغییرات مدیر)",
     backToSite: "→ بازگشت به سایت",
@@ -80,29 +128,34 @@ const NAV_GROUPS = [
   {
     key: "main",
     items: [
-      { to: "/admin",              icon: LayoutDashboard, key: "overview",  end: true },
-      { to: "/admin/messages",     icon: MessageSquare,   key: "messages" },
+      { to: "/admin/dashboard", icon: LayoutDashboard, key: "dashboard" },
+      { to: "/admin/messages", icon: MessageSquare, key: "messages" },
     ],
   },
   {
     key: "siteContent",
     keyLabel: "siteContent",
     items: [
-      { to: "/admin/homepage",     icon: Globe,           key: "homepage" },
-      { to: "/admin/services",     icon: Briefcase,       key: "services" },
-      { to: "/admin/projects",     icon: FolderKanban,    key: "projects" },
-      { to: "/admin/team",         icon: Users,           key: "team" },
-      { to: "/admin/clients",      icon: Building2,       key: "clients" },
-      { to: "/admin/equipment",    icon: Wrench,          key: "equipment" },
-      { to: "/admin/news",         icon: Newspaper,       key: "news" },
-      { to: "/admin/jobs",         icon: Briefcase,       key: "jobs" },
+      { to: "/admin/homepage", icon: Building2, key: "company" },
+      { to: "/admin/about", icon: Globe, key: "about" },
+      { to: "/admin/services", icon: Briefcase, key: "services" },
+      { to: "/admin/projects", icon: FolderKanban, key: "projects" },
+      { to: "/admin/equipment", icon: Wrench, key: "equipment" },
+      { to: "/admin/sustainability", icon: Leaf, key: "sustainability" },
+      { to: "/admin/methodology", icon: ClipboardList, key: "methodology" },
+      { to: "/admin/team", icon: Users, key: "team" },
+      { to: "/admin/upcoming", icon: CalendarDays, key: "upcoming" },
+      { to: "/admin/clients", icon: Building2, key: "clients" },
+      { to: "/admin/jobs", icon: Briefcase, key: "jobs" },
+      { to: "/admin/contact", icon: Contact, key: "contact" },
     ],
   },
   {
     key: "system",
     items: [
-      { to: "/admin/media",        icon: ImageIcon,        key: "media" },
-      { to: "/admin/settings",     icon: Settings,         key: "settings" },
+      { to: "/admin/media", icon: ImageIcon, key: "media" },
+      { to: "/admin/settings", icon: Settings, key: "settings" },
+      { to: "/admin/users", icon: Users, key: "users" },
     ],
   },
 ];
@@ -127,7 +180,10 @@ function NavItem({ to, icon: Icon, t, keyName, end }) {
   );
 }
 
-function NavGroup({ group, t }) {
+function NavGroup({ group, t, canManageUsers }) {
+  const visibleItems = group.items.filter(
+    (item) => item.key !== "users" || canManageUsers,
+  );
   return (
     <div className="space-y-1">
       {group.keyLabel && (
@@ -135,7 +191,7 @@ function NavGroup({ group, t }) {
           {t(`nav.${group.keyLabel}`)}
         </div>
       )}
-      {group.items.map((it) => (
+      {visibleItems.map((it) => (
         <NavItem key={it.to} {...it} t={t} />
       ))}
     </div>
@@ -150,19 +206,28 @@ export default function AdminLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [overridesLive, setOverridesLive] = useState(hasOverrides());
 
-  if (typeof window !== "undefined") {
-    window.addEventListener("sms:content-changed", () => setOverridesLive(hasOverrides()));
-  }
+  useEffect(() => {
+    const updateStatus = () => setOverridesLive(hasOverrides());
+    window.addEventListener("sms:content-changed", updateStatus);
+    return () =>
+      window.removeEventListener("sms:content-changed", updateStatus);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
-    navigate("/");
+    navigate("/login", { replace: true });
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm(t("confirmReset"))) {
-      resetAllOverrides();
-      setOverridesLive(false);
+      try {
+        await resetAllOverrides();
+        setOverridesLive(false);
+      } catch (error) {
+        window.alert(
+          error.response?.data?.message || "Could not reset website content.",
+        );
+      }
     }
   };
 
@@ -171,17 +236,33 @@ export default function AdminLayout() {
       {/* ── Sidebar (desktop) ──────────────────────────────────────────── */}
       <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-navy-800 md:text-white">
         <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
-          <div className="h-9 w-9 rounded-md bg-smsorange-500 grid place-items-center font-display font-extrabold text-white">S</div>
+          <div className="h-9 w-9 rounded-md bg-smsorange-500 grid place-items-center font-display font-extrabold text-white">
+            S
+          </div>
           <div className="leading-tight">
             <div className="font-bold">SMS</div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-smsgold-400">Admin Panel</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-smsgold-400">
+              Admin Panel
+            </div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
           {NAV_GROUPS.map((g) => (
-            <NavGroup key={g.key} group={g} t={t} />
+            <NavGroup
+              key={g.key}
+              group={g}
+              t={t}
+              canManageUsers={Number(user?.is_super_admin) === 1}
+            />
           ))}
         </nav>
+        <button
+          onClick={handleLogout}
+          className="mx-3 mb-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+        >
+          <LogOut className="h-4 w-4" />
+          {t("logout")}
+        </button>
         <div className="px-3 py-3 border-t border-white/10 text-[11px] text-white/60">
           <div className={overridesLive ? "text-smsgold-300" : "text-white/40"}>
             {overridesLive ? t("overridesActive") : t("overridesNone")}
@@ -204,19 +285,38 @@ export default function AdminLayout() {
 
       {mobileNavOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-navy-900/60" onClick={() => setMobileNavOpen(false)} />
+          <div
+            className="fixed inset-0 bg-navy-900/60"
+            onClick={() => setMobileNavOpen(false)}
+          />
           <aside className="relative w-72 max-w-[85vw] bg-navy-800 text-white p-4 overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="font-bold">{t("brand")}</div>
-              <button onClick={() => setMobileNavOpen(false)} aria-label="Close menu" className="p-2 rounded-md hover:bg-white/10">
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                aria-label="Close menu"
+                className="p-2 rounded-md hover:bg-white/10"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <nav className="space-y-2">
               {NAV_GROUPS.map((g) => (
-                <NavGroup key={g.key} group={g} t={t} />
+                <NavGroup
+                  key={g.key}
+                  group={g}
+                  t={t}
+                  canManageUsers={Number(user?.is_super_admin) === 1}
+                />
               ))}
             </nav>
+            <button
+              onClick={handleLogout}
+              className="mt-4 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <LogOut className="h-4 w-4" />
+              {t("logout")}
+            </button>
           </aside>
         </div>
       )}
@@ -224,9 +324,16 @@ export default function AdminLayout() {
       {/* ── Top bar (desktop) ─────────────────────────────────────────── */}
       <header className="hidden md:flex sticky top-0 z-30 bg-white border-b border-charcoal-100 h-16 items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <a href="/" className="text-sm text-charcoal-500 hover:text-charcoal-900">{t("backToSite")}</a>
+          <a
+            href="/"
+            className="text-sm text-charcoal-500 hover:text-charcoal-900"
+          >
+            {t("backToSite")}
+          </a>
           <span className="text-charcoal-300">·</span>
-          <h1 className="text-sm font-semibold text-charcoal-800">{t("brand")}</h1>
+          <h1 className="text-sm font-semibold text-charcoal-800">
+            {t("brand")}
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -248,19 +355,30 @@ export default function AdminLayout() {
                 {(user?.name || user?.email || "A").slice(0, 1).toUpperCase()}
               </div>
               <div className="hidden lg:block leading-tight text-left">
-                <div className="text-xs font-semibold text-charcoal-900">{user?.name || t("user")}</div>
-                <div className="text-[10px] text-charcoal-500">{user?.email}</div>
+                <div className="text-xs font-semibold text-charcoal-900">
+                  {user?.name || t("user")}
+                </div>
+                <div className="text-[10px] text-charcoal-500">
+                  {user?.email}
+                </div>
               </div>
               <ChevronDown className="h-4 w-4 text-charcoal-400" />
             </button>
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-56 rounded-md border border-charcoal-100 bg-white shadow-sms-strong py-1 z-40">
                 <div className="px-3 py-2 border-b border-charcoal-100 lg:hidden">
-                  <div className="text-xs font-semibold">{user?.name || t("user")}</div>
-                  <div className="text-[11px] text-charcoal-500 truncate">{user?.email}</div>
+                  <div className="text-xs font-semibold">
+                    {user?.name || t("user")}
+                  </div>
+                  <div className="text-[11px] text-charcoal-500 truncate">
+                    {user?.email}
+                  </div>
                 </div>
                 <button
-                  onClick={() => { setUserMenuOpen(false); navigate("/admin/settings"); }}
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    navigate("/admin/settings");
+                  }}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-charcoal-50 inline-flex items-center gap-2"
                 >
                   <Settings className="h-4 w-4" /> {t("nav.settings")}
@@ -285,4 +403,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-

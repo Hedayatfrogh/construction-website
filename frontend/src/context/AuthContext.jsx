@@ -1,66 +1,85 @@
 // AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import api, { clearAccessToken, setAccessToken } from "../api";
 
 export const AuthContext = createContext();
-
-// Use a relative `/api/v1` URL so requests go through Vite's dev proxy
-// (configured in vite.config.js -> `server.proxy['/api']`). This means the
-// same frontend bundle works from `localhost`, `127.0.0.1`, or any LAN IP
-// (`http://192.168.x.x:5173`) without needing to rebuild for each host.
-//
-// To override at build time (e.g. for a deployed build pointing at a
-// different API), set `VITE_API_BASE_URL` before running `npm run build`.
-const baseURL = import.meta.env.VITE_API_BASE_URL || "/api/v1";
-
-const api = axios.create({
-  baseURL,
-  withCredentials: true,
-  timeout: 10000,
-});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = async () => {
+    const tokenAtStart = window.sessionStorage.getItem("sms.admin.token");
+    let superseded = false;
     try {
       const res = await api.get("/users/me");
-      if (res.data.status === "success") {
+      if (window.sessionStorage.getItem("sms.admin.token") !== tokenAtStart) {
+        superseded = true;
+        return;
+      }
+      if (
+        res.data.status === "success" &&
+        res.data.data.user?.role === "admin"
+      ) {
         setUser(res.data.data.user);
       } else {
+        clearAccessToken();
         setUser(null);
       }
-    } catch (error) {
-      setUser(null);
+    } catch {
+      if (window.sessionStorage.getItem("sms.admin.token") === tokenAtStart) {
+        if (tokenAtStart) clearAccessToken();
+        setUser(null);
+      } else superseded = true;
     } finally {
-      setIsLoading(false);
+      if (!superseded) setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) {
-      fetchUser(); // Only fetch if no user is set
-    } else {
-      setIsLoading(false); // Skip loading if user is already set
+    fetchUser();
+    const onExpired = () => {
+      setUser(null);
+      setIsLoading(false);
+    };
+    window.addEventListener("sms:auth-expired", onExpired);
+    return () => window.removeEventListener("sms:auth-expired", onExpired);
+  }, []);
+
+  const login = async (credentials) => {
+    const res = await api.post("/users/login", credentials);
+    const token = res.data?.token;
+    const authenticatedUser = res.data?.data?.user;
+    if (!token || authenticatedUser?.role !== "admin") {
+      throw new Error(
+        "The server did not return a valid administrator session.",
+      );
     }
-  }, [user]); // Depend on user state
+    setAccessToken(token);
+    setUser(authenticatedUser);
+    setIsLoading(false);
+    return authenticatedUser;
+  };
 
   const logout = async () => {
     try {
       await api.post("/users/logout");
-      setUser(null);
       return { success: true };
     } catch (error) {
       return {
         success: false,
         error: error.response?.data?.message || "Failed to log out",
       };
+    } finally {
+      clearAccessToken();
+      setUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, isLoading, fetchUser, api }}>
+    <AuthContext.Provider
+      value={{ user, setUser, login, logout, isLoading, fetchUser, api }}
+    >
       {children}
     </AuthContext.Provider>
   );

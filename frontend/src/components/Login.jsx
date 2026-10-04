@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import axios from "axios";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -15,7 +14,7 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { setUser, fetchUser, api } = useAuth();
+  const { login } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -33,42 +32,37 @@ export default function AdminLogin() {
     return Object.keys(newErrors).length === 0;
   };
 
- // Login.jsx
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm() || isLoading) {
-    return;
-  }
-  setIsLoading(true);
-  try {
-    const res = await api.post("/users/login", { email, password });
-   
-
-    const { data: { user } } = res.data;
-    if (!user) {
-      throw new Error("No user data returned");
+  // Login.jsx
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm() || isLoading) {
+      return;
     }
-    if (!user.role) {
-      throw new Error("User role not provided by server");
+    setIsLoading(true);
+    try {
+      await login({ email: email.trim(), password });
+      navigate("/admin/dashboard", { replace: true });
+    } catch (error) {
+      const status = error.response?.status;
+      let message = t("login.errGeneric");
+      if (status === 401) message = t("login.errInvalidCredentials");
+      else if (
+        status === 503 ||
+        status === 404 ||
+        error.code === "ECONNABORTED"
+      ) {
+        message = t("login.errUnableConnect");
+      } else if (!error.response) message = t("login.errNetwork");
+      else if (status >= 500 && !error.response.data?.message)
+        message = t("login.errUnableConnect");
+      else if (status >= 500) message = t("login.errServer");
+      else if (error.response.data?.message)
+        message = error.response.data.message;
+      setErrors({ general: message });
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(user);
-    await fetchUser();
-    setIsLoading(false);
-    if (user.role === "admin") {
-      navigate("/dashboard");
-    } else {
-      navigate("/");
-    }
-  } catch (error) {
-    setIsLoading(false);
-    const errorMessage =
-      error.response?.data?.message ||
-      t("login.errGeneric");
-    console.error("Login error:", error.response?.data || error.message);
-    setErrors({ ...errors, general: errorMessage });
-  }
-};
+  };
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value.trim());
@@ -78,12 +72,12 @@ const handleSubmit = async (e) => {
   };
 
   const handlePasswordChange = (e) => {
-    setPassword(e.target.value.trim());
+    setPassword(e.target.value);
     if (errors.password || errors.general) {
       setErrors((prev) => ({ ...prev, password: "", general: "" }));
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -120,7 +114,10 @@ const handleSubmit = async (e) => {
         >
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 {t("login.emailLabel")}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -140,11 +137,16 @@ const handleSubmit = async (e) => {
                   placeholder={t("login.emailPlaceholder")}
                 />
               </div>
-              {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 {t("login.passwordLabel")}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -169,15 +171,23 @@ const handleSubmit = async (e) => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="text-gray-400 hover:text-gray-500 focus:outline-none"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
-              {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && (
+                <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+              )}
             </div>
 
             {errors.general && (
-              <p className="text-sm text-white bg-red-600 text-center py-2 rounded">{errors.general}</p>
+              <p className="text-sm text-white bg-red-600 text-center py-2 rounded">
+                {errors.general}
+              </p>
             )}
 
             <div>
@@ -217,9 +227,13 @@ const handleSubmit = async (e) => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              {t("login.footerNotice")}
-            </p>
+            <Link
+              to="/forgot-password"
+              className="mb-3 block text-sm font-medium text-smsorange-600 hover:underline"
+            >
+              Forgot password?
+            </Link>
+            <p className="text-xs text-gray-500">{t("login.footerNotice")}</p>
           </div>
         </motion.div>
       </div>

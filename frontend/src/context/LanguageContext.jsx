@@ -76,9 +76,12 @@ export function LanguageProvider({ children }) {
   }, []);
 
   // `t` is memoised so consumers can put it in dependency arrays safely.
+  // It forwards extra arguments so that dictionary entries that are
+  // functions (e.g. `serviceDetail.ctaTitle: (n) => \`Plan your ${n} project\``)
+  // can receive interpolation values such as the current service title.
   const value = useMemo(() => {
     const dir = isRtl(lang) ? "rtl" : "ltr";
-    const t = (key) => translate(lang, key);
+    const t = (key, ...args) => translate(lang, key, ...args);
     return { lang, dir, setLang, toggleLang, t };
   }, [lang, setLang, toggleLang]);
 
