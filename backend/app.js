@@ -1,21 +1,22 @@
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const morgan = require("morgan");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-const hpp = require("hpp");
-const xss = require("xss-clean");
-const path = require("path");
-const globalErrorHandler = require("./Controllers/globalErrorHandler");
-const adminController = require("./Controllers/adminController");
-const MessageRouter = require("./Routers/messageRouter");
-const usersRouter = require("./Routers/usersRouter");
-const adminRouter = require("./Routers/adminRouter");
-const provincesRouter = require("./Routers/provincesRouter");
-const categoriesRouter = require("./Routers/categoriesRouter");
-const companiesRouter = require("./Routers/companiesRouter");
-const advertisementsRouter = require("./Routers/advertisementsRouter");
+// app.js
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const xss = require('xss-clean');
+const path = require('path');
+const globalErrorHandler = require('./Controllers/globalErrorHandler');
+const MessageRouter = require('./Routers/messageRouter');
+const usersRouter = require('./Routers/usersRouter');
+const provincesRouter = require('./Routers/provincesRouter');
+const categoriesRouter = require('./Routers/categoriesRouter');
+const companiesRouter = require('./Routers/companiesRouter');
+const advertisementsRouter = require('./Routers/advertisementsRouter');
+const contentRouter = require('./Routers/contentRouter');
+const adminRouter = require('./Routers/adminRouter');
 
 const app = express();
 
@@ -110,7 +111,11 @@ app.options(
 
 app.use(cookieParser());
 app.use(helmet());
-app.use(express.json());
+
+// Parse JSON
+app.use(express.json({ limit: '2mb' }));
+
+// Prevent HTTP parameter pollution & XSS
 app.use(hpp());
 app.use(xss());
 app.use(morgan("dev"));
@@ -125,15 +130,16 @@ app.use(
   }),
 );
 
-app.use("/api/v1/messages", MessageRouter);
-app.use("/api/v1/users", usersRouter);
-app.use("/api/v1/provinces", provincesRouter);
-app.use("/api/v1/categories", categoriesRouter);
-app.use("/api/v1/companies", companiesRouter);
-app.use("/api/v1/advertisements", advertisementsRouter);
-app.get("/api/v1/content", adminController.getPublicContent);
-app.use("/api/v1/admin", adminRouter);
+app.use('/api/v1/messages', MessageRouter);
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/provinces', provincesRouter);
+app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/companies', companiesRouter);
+app.use('/api/v1/advertisements', advertisementsRouter);
+app.use('/api/v1/content', contentRouter);
+app.use('/api/v1/admin', adminRouter);
 
+// Global error handler
 app.use(globalErrorHandler);
 
 app.use("*", (req, res) => {
@@ -142,7 +148,5 @@ app.use("*", (req, res) => {
     message: `Can't find ${req.originalUrl}`,
   });
 });
-
-module.exports = app;
 
 module.exports = app;

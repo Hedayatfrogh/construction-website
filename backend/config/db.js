@@ -1,46 +1,36 @@
-const dns = require("dns");
-const mysql = require("mysql2/promise");
-const mongoose = require("mongoose");
+const fs = require('fs');
+const path = require('path');
+const { DatabaseSync } = require('node:sqlite');
 
-// Use explicit public DNS servers to resolve MongoDB Atlas SRV records on Windows environments.
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+let db = null;
+const models = [];
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || "SparkTrust",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const resolveDbPath = () =>
+  path.resolve(__dirname, '..', process.env.DB_PATH || 'data/database.sqlite');
 
-pool
-  .getConnection()
-  .then(() => console.log("Connected to MySQL database (SparkTrust)"))
-  .catch((err) =>
-    console.error("Error connecting to MySQL:", err.message || err),
-  );
-
-const connectDB = async () => {
-  if (!process.env.MONGODB_URI) {
-    const errorMsg =
-      "MONGODB_URI environment variable is missing. MongoDB-backed routes will remain unavailable until it is configured.";
-    console.warn(errorMsg);
-    return null;
-  }
-
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`Connected to MongoDB database (${conn.connection.name})`);
-    return conn;
-  } catch (err) {
-    console.error("Error connecting to MongoDB:", err.message);
-    console.log("Retrying MongoDB connection in 5 seconds...");
-    setTimeout(connectDB, 5000);
-    return null;
-  }
+// Opens the SQLite file (creating it and its folder if missing).
+const getDb = () => {
+  if (db) return db;
+  const dbPath = resolveDbPath();
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  db = new DatabaseSync(dbPath);
+  db.exec('PRAGMA journal_mode = WAL;');
+  return db;
 };
 
-module.exports = pool;
-module.exports.connectDB = connectDB;
+const registerModel = (model) => {
+  models.push(model);
+};
+
+// Opens the database and creates/migrates every registered model's table.
+const connectDB = () => {
+  const conn = getDb();
+  models.forEach((model) => model.ensureTable());
+  console.log(`Connected to SQLite database (${resolveDbPath()})`);
+  return conn;
+};
+
+module.exports = connectDB;
+module.exports.getDb = getDb;
+module.exports.registerModel = registerModel;
+module.exports.resolveDbPath = resolveDbPath;

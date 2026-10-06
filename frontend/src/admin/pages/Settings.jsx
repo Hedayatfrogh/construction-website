@@ -14,11 +14,12 @@ import {
   Badge,
 } from "../adminUI";
 import {
-  getAllOverrides,
   setSection,
   useContentSection,
   hasOverrides,
   resetAllOverrides,
+  getAllContent,
+  replaceAllContent,
 } from "../../data/contentStore";
 import { DEFAULT_SETTINGS } from "../../data/adminSeed";
 import { Database, Trash2, Download, Upload } from "lucide-react";
@@ -86,7 +87,7 @@ export default function Settings() {
       [
         JSON.stringify(
           {
-            content: getAllOverrides(),
+            content: getAllContent(),
             exportedAt: new Date().toISOString(),
           },
           null,
@@ -108,16 +109,30 @@ export default function Settings() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (e) => {
+      let data;
       try {
-        const data = JSON.parse(String(e.target?.result || ""));
-        const content = data.content || data;
-        if (content && typeof content === "object" && !Array.isArray(content)) {
-          for (const [section, value] of Object.entries(content))
-            await setSection(section, value);
-          alert("Content imported to the website database.");
-        }
-      } catch (err) {
+        data = JSON.parse(String(e.target?.result || ""));
+      } catch {
         alert("Invalid JSON file.");
+        return;
+      }
+
+      try {
+        const content =
+          data.content ||
+          (typeof data.company === "string"
+            ? JSON.parse(data.company)
+            : data);
+        if (!content || typeof content !== "object" || Array.isArray(content)) {
+          alert("The JSON file does not contain valid website content.");
+          return;
+        }
+        await replaceAllContent(content);
+        alert("Content imported to the website database.");
+      } catch (error) {
+        alert(
+          error.response?.data?.message || "Could not import website content.",
+        );
       }
     };
     reader.readAsText(file);
@@ -290,8 +305,8 @@ export default function Settings() {
                   Storage backend
                 </div>
                 <div className="text-xs text-charcoal-500">
-                  Website content is stored in the connected MySQL database and
-                  served to public pages.
+                  Website content is stored in the backend&apos;s local SQLite
+                  database and served to public pages.
                 </div>
               </div>
               <Badge tone={overridesLive ? "brand" : "neutral"}>
