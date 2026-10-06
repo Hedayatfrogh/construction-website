@@ -1,41 +1,28 @@
-const mongoose = require('mongoose');
+const defineModel = require('../utils/sqliteModel');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Please tell us your name!'],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Please provide your email!'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: [true, 'Please provide a password!'],
-      select: true,
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'admin',
-    },
+const User = defineModel('User', 'users', {
+  name: {
+    type: 'string',
+    required: 'Please tell us your name!',
+    trim: true,
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
-);
-
-// Ensure `id` string getter works seamlessly
-userSchema.virtual('id').get(function () {
-  return this._id.toHexString();
+  email: {
+    type: 'string',
+    required: 'Please provide your email!',
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  password: {
+    type: 'string',
+    required: 'Please provide a password!',
+    select: false,
+  },
+  role: {
+    type: 'string',
+    enum: ['user', 'admin'],
+    default: 'admin',
+  },
 });
 
-const User = mongoose.model('User', userSchema);
 module.exports = User;

@@ -13,9 +13,10 @@ router.post('/', messageController.createMessage)
 router.get(
   '/:websiteId',
   authController.protect,
+  authController.restrictTo('admin'),
   messageController.getMessagesByWebsite
 )
 
-router.patch('/:id',authController.protect, messageController.updateMessage)
+router.patch('/:id',authController.protect, authController.restrictTo('admin'), messageController.updateMessage)
 
 module.exports = router

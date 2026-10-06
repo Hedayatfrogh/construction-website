@@ -37,7 +37,7 @@ function StatCard({ icon: Icon, label, count, to, tone = "brand" }) {
 }
 
 export default function Overview() {
-  const { user } = useAuth();
+  const { user, api } = useAuth();
   const [unreadMessages, setUnreadMessages] = useState(null);
 
   const projects = useContentSection("projects", []);
@@ -50,9 +50,7 @@ export default function Overview() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/v1/messages/azad_noori", { credentials: "include" });
-        if (!res.ok) return;
-        const json = await res.json();
+        const { data: json } = await api.get("/messages/azad_noori");
         if (cancelled) return;
         const unread = (json.data || []).filter((m) => !m.isRead).length;
         setUnreadMessages(unread);
@@ -99,7 +97,7 @@ export default function Overview() {
             <li>Add <strong>Team members</strong> so the <code>/team</code> page reflects your real staff.</li>
             <li>Publish <strong>News</strong> articles so visitors see fresh content.</li>
             <li>Reply to incoming <strong>Messages</strong> from the contact form on the public site.</li>
-            <li>All edits are saved to your browser&apos;s local storage. Use the <strong>Reset all CMS overrides</strong> button in the top bar to restore the static defaults anytime.</li>
+            <li>All edits are saved to the local database. Use the <strong>Reset all CMS overrides</strong> button in the top bar to restore the static defaults anytime.</li>
           </ol>
         </Card>
       </div>

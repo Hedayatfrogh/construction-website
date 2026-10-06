@@ -34,7 +34,17 @@ export default function Contact() {
     setSubmitting(true);
     setStatus({ kind: "idle", text: "" });
     try {
-      await api.post("/contact", form).catch(() => null);
+      const [firstName, ...rest] = form.fullName.trim().split(/\s+/);
+      const message = form.message.trim();
+      await api.post("/messages", {
+        firstName,
+        lastName: rest.join(" "),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        company: form.company.trim(),
+        description: form.subject.trim() ? `${form.subject.trim()}\n\n${message}` : message,
+        websiteId: "azad_noori",
+      });
       setStatus({ kind: "success", text: t("contact.successMessage") });
       setForm(initialForm);
     } catch {

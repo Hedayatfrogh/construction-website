@@ -15,6 +15,7 @@ const provincesRouter = require('./Routers/provincesRouter');
 const categoriesRouter = require('./Routers/categoriesRouter');
 const companiesRouter = require('./Routers/companiesRouter');
 const advertisementsRouter = require('./Routers/advertisementsRouter');
+const contentRouter = require('./Routers/contentRouter');
 
 const app = express();
 
@@ -140,7 +141,7 @@ app.use(cookieParser());
 app.use(helmet());
 
 // Parse JSON
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 // Prevent HTTP parameter pollution & XSS
 app.use(hpp());
@@ -166,6 +167,7 @@ app.use('/api/v1/provinces', provincesRouter);
 app.use('/api/v1/categories', categoriesRouter);
 app.use('/api/v1/companies', companiesRouter);
 app.use('/api/v1/advertisements', advertisementsRouter);
+app.use('/api/v1/content', contentRouter);
 
 // Global error handler
 app.use(globalErrorHandler);

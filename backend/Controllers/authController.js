@@ -127,11 +127,7 @@ exports.logIn = catchAsync(async (req, res, next) => {
   }
 
   const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    return next(new AppError('Incorrect email or password!', 401));
-  }
-
-  if (!user) {
+  if (!user || !(await bcrypt.compare(String(password), user.password))) {
     return next(new AppError('Incorrect email or password!', 401));
   }
 
@@ -173,26 +169,16 @@ exports.protect = async (req, res, next) => {
       cookieName = 'jwt_sparktrust';
     }
 
-    if (req.cookies && req.cookies[cookieName]) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+      console.log('Using Authorization header token:', token.slice(0, 20) + '...');
+    } else if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
       console.log(`Using cookie-based token (${cookieName}):`, token.slice(0, 20) + '...');
-    } else if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-      console.warn('Using Authorization header as fallback:', token.slice(0, 20) + '...');
     }
 
     if (!token) {
-      return next(
-        new AppError(
-          `You are not logged in! Cookies: ${JSON.stringify(req.cookies)}, Headers: ${
-            req.headers.authorization || 'none'
-          }, Origin: ${req.headers.origin || 'none'}`,
-          401
-        )
-      );
+      return next(new AppError('You are not logged in! Please log in to get access.', 401));
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -206,6 +192,9 @@ exports.protect = async (req, res, next) => {
     req.user = currentUser;
     next();
   } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return next(new AppError('Your session has expired. Please log in again.', 401));
+    }
     return next(new AppError(`Invalid token: ${err.message}`, 401));
   }
 };

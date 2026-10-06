@@ -2,3 +2,5 @@ node_modules
 # Local environment with credentials — must NEVER be committed.
 # Use config.example.env as the template.
 config.env
+# Local SQLite database
+data/

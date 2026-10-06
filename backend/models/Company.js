@@ -1,60 +1,20 @@
-const mongoose = require('mongoose');
+const defineModel = require('../utils/sqliteModel');
 
-const companySchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Company name is required'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    logo: {
-      type: String,
-      trim: true,
-    },
-    website: {
-      type: String,
-      trim: true,
-    },
-    phone: {
-      type: String,
-      trim: true,
-    },
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-    },
-    province: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Province',
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
+const Company = defineModel('Company', 'companies', {
+  name: {
+    type: 'string',
+    required: 'Company name is required',
+    trim: true,
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
-);
-
-companySchema.virtual('id').get(function () {
-  return this._id.toHexString();
+  description: { type: 'string', trim: true },
+  logo: { type: 'string', trim: true },
+  website: { type: 'string', trim: true },
+  phone: { type: 'string', trim: true },
+  email: { type: 'string', trim: true, lowercase: true },
+  category: { type: 'ref', ref: 'Category' },
+  province: { type: 'ref', ref: 'Province' },
+  address: { type: 'string', trim: true },
+  isPublished: { type: 'boolean', default: true },
 });
 
-const Company = mongoose.model('Company', companySchema);
 module.exports = Company;
