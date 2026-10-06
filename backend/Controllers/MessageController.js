@@ -3,7 +3,7 @@ const AppError = require('../utils/AppError');
 const Message = require('../models/Message');
 
 exports.createMessage = catchAsync(async (req, res, next) => {
-  const { firstName, lastName, company, email, description, websiteId } =
+  const { firstName, lastName, company, email, phone, description, websiteId } =
     req.body;
 
   if (!['spark_trust', 'azad_noori'].includes(websiteId)) {
@@ -12,9 +12,10 @@ exports.createMessage = catchAsync(async (req, res, next) => {
 
   const newMessage = await Message.create({
     firstName,
-    lastName,
+    lastName: lastName || '',
     company: company || '',
     email,
+    phone: phone || '',
     description,
     websiteId,
   });

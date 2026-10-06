@@ -24,7 +24,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { hasOverrides, resetAllOverrides } from "../data/contentStore";
+import { hasOverrides, resetAllOverrides, useContentStatus } from "../data/contentStore";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -136,7 +136,7 @@ function NavGroup({ group, t }) {
         </div>
       )}
       {group.items.map((it) => (
-        <NavItem key={it.to} {...it} t={t} />
+        <NavItem key={it.to} {...it} keyName={it.key} t={t} />
       ))}
     </div>
   );
@@ -149,6 +149,7 @@ export default function AdminLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [overridesLive, setOverridesLive] = useState(hasOverrides());
+  const contentStatus = useContentStatus();
 
   if (typeof window !== "undefined") {
     window.addEventListener("sms:content-changed", () => setOverridesLive(hasOverrides()));
@@ -279,7 +280,16 @@ export default function AdminLayout() {
 
       <main className="md:ml-64 min-h-screen">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
-          <Outlet />
+          {contentStatus.loaded ? (
+            <Outlet />
+          ) : contentStatus.error ? (
+            <div className="text-center py-12 text-sm text-charcoal-600">
+              <p className="text-red-600 mb-3">{contentStatus.error}</p>
+              <button onClick={contentStatus.retry} className="px-3 py-1.5 rounded-md bg-smsorange-500 hover:bg-smsorange-600 text-white text-sm font-semibold">Retry</button>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-charcoal-500 text-sm">Loading…</div>
+          )}
         </div>
       </main>
     </div>

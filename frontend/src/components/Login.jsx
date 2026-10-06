@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth, saveToken } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import axios from "axios";
 
@@ -18,6 +18,7 @@ export default function AdminLogin() {
   const { setUser, fetchUser, api } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const validateForm = () => {
     const newErrors = {};
@@ -52,11 +53,12 @@ const handleSubmit = async (e) => {
       throw new Error("User role not provided by server");
     }
 
+    saveToken(res.data.token);
     setUser(user);
     await fetchUser();
     setIsLoading(false);
     if (user.role === "admin") {
-      navigate("/dashboard");
+      navigate(location.state?.from?.pathname || "/dashboard");
     } else {
       navigate("/");
     }

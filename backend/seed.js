@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 const path = require('path');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, 'config.env') });
@@ -11,24 +10,36 @@ const Category = require('./models/Category');
 const Province = require('./models/Province');
 const connectDB = require('./config/db');
 
+// Override the defaults with SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD / SEED_ADMIN_NAME.
+// Pass --reset-password to update the password of an existing admin.
+const adminCredentials = require('./config/adminCredentials');
+const adminEmail = (process.env.SEED_ADMIN_EMAIL || adminCredentials.email).trim().toLowerCase();
+const adminPassword = process.env.SEED_ADMIN_PASSWORD || adminCredentials.password;
+const adminName = process.env.SEED_ADMIN_NAME || adminCredentials.name;
+const resetPassword = process.argv.includes('--reset-password');
+
 const seedData = async () => {
   try {
-    await connectDB();
-    console.log('Connected to MongoDB for seeding...');
+    connectDB();
+    console.log('Connected to SQLite for seeding...');
 
     // Check if admin user exists
-    const adminExists = await User.findOne({ email: 'admin@sparktrust.tech' });
+    const adminExists = await User.findOne({ email: adminEmail });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('pass123', 12);
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
       await User.create({
-        name: 'Admin User',
-        email: 'admin@sparktrust.tech',
+        name: adminName,
+        email: adminEmail,
         password: hashedPassword,
         role: 'admin',
       });
-      console.log('Default admin user created: admin@sparktrust.tech / pass123');
+      console.log(`Default admin user created: ${adminEmail} / ${adminPassword}`);
+    } else if (resetPassword) {
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
+      await User.findByIdAndUpdate(adminExists._id, { password: hashedPassword, role: 'admin' });
+      console.log(`Admin password reset: ${adminEmail} / ${adminPassword}`);
     } else {
-      console.log('Admin user already exists.');
+      console.log(`Admin user already exists: ${adminEmail} (use --reset-password to change it)`);
     }
 
     // Seed sample categories if empty

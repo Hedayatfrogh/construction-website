@@ -8,7 +8,7 @@ import {
   PageHeader, Card, Field, TextInput, TextArea, SaveBar,
   Badge,
 } from "../adminUI";
-import { setSection, useContentSection, hasOverrides, resetAllOverrides } from "../../data/contentStore";
+import { setSection, useContentSection, hasOverrides, resetAllOverrides, getAllContent, replaceAllContent } from "../../data/contentStore";
 import { DEFAULT_SETTINGS } from "../../data/adminSeed";
 import { Database, Trash2, Download, Upload } from "lucide-react";
 
@@ -42,7 +42,7 @@ export default function Settings() {
 
   const handleExport = () => {
     const blob = new Blob([JSON.stringify({
-      company:    window.localStorage.getItem("sms.content.override.v1"),
+      content:    getAllContent(),
       exportedAt: new Date().toISOString(),
     }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -61,9 +61,10 @@ export default function Settings() {
       try {
         const data = JSON.parse(String(e.target?.result || ""));
         if (data && typeof data === "object") {
-          window.localStorage.setItem("sms.content.override.v1", JSON.stringify(data.company || data));
-          window.dispatchEvent(new CustomEvent("sms:content-changed"));
-          alert("Content imported. Reload pages to see changes.");
+          // Older exports stored the whole store as a JSON string under `company`.
+          const content = data.content
+            || (typeof data.company === "string" ? JSON.parse(data.company) : data);
+          replaceAllContent(content || {}).then(() => alert("Content imported."));
         }
       } catch (err) {
         alert("Invalid JSON file.");
@@ -105,7 +106,7 @@ export default function Settings() {
               <Database className="h-5 w-5 text-charcoal-400" />
               <div className="flex-1">
                 <div className="font-semibold text-charcoal-800">Storage backend</div>
-                <div className="text-xs text-charcoal-500">All admin edits are saved to your browser's <code>localStorage</code> under <code>sms.content.override.v1</code>.</div>
+                <div className="text-xs text-charcoal-500">All admin edits are saved to the backend's local SQLite database.</div>
               </div>
               <Badge tone={overridesLive ? "brand" : "neutral"}>
                 {overridesLive ? "Overrides active" : "All static (no overrides)"}

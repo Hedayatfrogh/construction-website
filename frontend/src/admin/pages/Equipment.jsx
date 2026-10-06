@@ -10,7 +10,7 @@ import {
   SaveBar, EmptyState, Modal, IconButton, Trash2,
 } from "../adminUI";
 import { equipmentCategories as defaults } from "../../data/operations";
-import { setSection, useContentSection } from "../../data/contentStore";
+import { setSection, getSection, useContentSection } from "../../data/contentStore";
 import { Wrench, Edit3, Save } from "lucide-react";
 
 function CategoryEditor({ initial, onClose }) {
@@ -19,7 +19,7 @@ function CategoryEditor({ initial, onClose }) {
   useEffect(() => { setDraft({ ...initial }); }, [initial.id || initial.title]);
 
   const save = () => {
-    const all = useCurrent();
+    const all = currentCategories();
     const idx = all.findIndex((c) => (c.title || c.icon) === (initial.title || initial.icon));
     if (idx >= 0) all[idx] = draft;
     else all.push(draft);
@@ -55,9 +55,9 @@ function CategoryEditor({ initial, onClose }) {
   );
 }
 
-// Hook helper: returns the current categories list (override > default).
-function useCurrent() {
-  const override = useContentSection("equipmentCategories", null);
+// Returns a copy of the current categories list (override > default).
+function currentCategories() {
+  const override = getSection("equipmentCategories", null);
   return (override && Array.isArray(override) && override.length > 0) ? [...override] : defaults.map((d) => ({ ...d }));
 }
 

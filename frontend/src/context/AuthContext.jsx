@@ -13,11 +13,23 @@ export const AuthContext = createContext();
 // different API), set `VITE_API_BASE_URL` before running `npm run build`.
 const baseURL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://construction-website-v4cp.onrender.com/api/v1";
-const api = axios.create({
+  (import.meta.env.DEV ? "/api/v1" : "https://construction-website-v4cp.onrender.com/api/v1");
+export const api = axios.create({
   baseURL,
   withCredentials: true,
   timeout: 10000,
+});
+
+const TOKEN_KEY = "sms.auth.token";
+export const saveToken = (token) => {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+};
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
 export const AuthProvider = ({ children }) => {
@@ -33,6 +45,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
+      if (error.response?.status === 401) saveToken(null);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -50,9 +63,12 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await api.post("/users/logout");
+      saveToken(null);
       setUser(null);
       return { success: true };
     } catch (error) {
+      saveToken(null);
+      setUser(null);
       return {
         success: false,
         error: error.response?.data?.message || "Failed to log out",

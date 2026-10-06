@@ -1,50 +1,18 @@
-const mongoose = require('mongoose');
+const defineModel = require('../utils/sqliteModel');
 
-const advertisementSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: [true, 'Advertisement title is required'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    image: {
-      type: String,
-      trim: true,
-    },
-    link: {
-      type: String,
-      trim: true,
-    },
-    position: {
-      type: String,
-      default: 'sidebar',
-      trim: true,
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
-    startDate: {
-      type: Date,
-    },
-    endDate: {
-      type: Date,
-    },
+const Advertisement = defineModel('Advertisement', 'advertisements', {
+  title: {
+    type: 'string',
+    required: 'Advertisement title is required',
+    trim: true,
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
-);
-
-advertisementSchema.virtual('id').get(function () {
-  return this._id.toHexString();
+  description: { type: 'string', trim: true },
+  image: { type: 'string', trim: true },
+  link: { type: 'string', trim: true },
+  position: { type: 'string', default: 'sidebar', trim: true },
+  isPublished: { type: 'boolean', default: true },
+  startDate: { type: 'date' },
+  endDate: { type: 'date' },
 });
 
-const Advertisement = mongoose.model('Advertisement', advertisementSchema);
 module.exports = Advertisement;

@@ -1,26 +1,36 @@
-const dns = require('dns');
-const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const { DatabaseSync } = require('node:sqlite');
 
-// Use explicit public DNS servers to resolve MongoDB Atlas SRV records on Windows environments
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+let db = null;
+const models = [];
 
-const connectDB = async () => {
-  if (!process.env.MONGODB_URI) {
-    const errorMsg =
-      'FATAL ERROR: MONGODB_URI environment variable is missing. Please set MONGODB_URI in your .env or environment configuration.';
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
+const resolveDbPath = () =>
+  path.resolve(__dirname, '..', process.env.DB_PATH || 'data/database.sqlite');
 
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`Connected to MongoDB database (${conn.connection.name})`);
-    return conn;
-  } catch (err) {
-    console.error('Error connecting to MongoDB:', err.message);
-    console.log('Retrying MongoDB connection in 5 seconds...');
-    setTimeout(connectDB, 5000);
-  }
+// Opens the SQLite file (creating it and its folder if missing).
+const getDb = () => {
+  if (db) return db;
+  const dbPath = resolveDbPath();
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  db = new DatabaseSync(dbPath);
+  db.exec('PRAGMA journal_mode = WAL;');
+  return db;
+};
+
+const registerModel = (model) => {
+  models.push(model);
+};
+
+// Opens the database and creates/migrates every registered model's table.
+const connectDB = () => {
+  const conn = getDb();
+  models.forEach((model) => model.ensureTable());
+  console.log(`Connected to SQLite database (${resolveDbPath()})`);
+  return conn;
 };
 
 module.exports = connectDB;
+module.exports.getDb = getDb;
+module.exports.registerModel = registerModel;
+module.exports.resolveDbPath = resolveDbPath;

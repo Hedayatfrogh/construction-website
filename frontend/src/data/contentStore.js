@@ -1,53 +1,79 @@
 // contentStore.js
 // ─────────────────────────────────────────────────────────────────────────────
-// Lightweight client-side content store with localStorage persistence.
+// Client-side content store backed by the backend's SQLite database.
 //
 // PURPOSE
 //   The site renders all of its editable copy from the static `data/*.js`
-//   modules. Without a CMS backend, we use a localStorage-backed override
-//   layer that the admin panel at /admin writes to and every public page
-//   reads from FIRST. When no override exists, the page falls back to the
-//   static module so the site works exactly as before for visitors who
-//   never open /admin.
+//   modules. The admin panel at /admin writes overrides per section to
+//   `/api/v1/content/:section`; readers get the override FIRST and fall
+//   back to the static module when none exists.
 //
-// STORAGE KEY
-//   We use a single namespaced key so the admin can clear all overrides
-//   with one click without trampling anything else in localStorage.
+// CACHE
+//   All sections are loaded once (`loadContent`) into an in-memory cache so
+//   reads stay synchronous. Writes update the cache immediately and are
+//   then saved to the backend in order. If a save fails, the admin is
+//   alerted and the cache is reloaded from the server.
 //
 // BROADCAST
 //   We dispatch a `sms:content-changed` CustomEvent on `window` after every
-//   write so multiple open tabs stay in sync without a full reload.
+//   change so every mounted consumer re-renders.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "sms.content.override.v1";
-const EVENT_NAME  = "sms:content-changed";
+import { useEffect, useState } from "react";
+import { api } from "../context/AuthContext";
 
-function readRaw() {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (_) { return null; }
+const EVENT_NAME = "sms:content-changed";
+
+let cache = {};
+let status = { loaded: false, error: null };
+let loadPromise = null;
+let saveQueue = Promise.resolve();
+
+function emit() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(EVENT_NAME));
 }
 
-function writeRaw(next) {
-  if (typeof window === "undefined") return;
-  try {
-    if (next == null) window.localStorage.removeItem(STORAGE_KEY);
-    else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent(EVENT_NAME));
-  } catch (_) { /* ignore */ }
+/** Fetch every section from the backend. Pass `force` to refetch. */
+export function loadContent(force = false) {
+  if (loadPromise && !force) return loadPromise;
+  loadPromise = api.get("/content")
+    .then((res) => {
+      cache = res.data?.data?.sections || {};
+      status = { loaded: true, error: null };
+    })
+    .catch((err) => {
+      status = { loaded: false, error: err.response?.data?.message || "Failed to load site content." };
+      loadPromise = null;
+    })
+    .finally(emit);
+  return loadPromise;
+}
+
+function persist(request) {
+  saveQueue = saveQueue
+    .then(request)
+    .catch((err) => {
+      const message = err.response?.data?.message || err.message || "Unknown error";
+      console.error("Failed to save content:", message);
+      if (typeof window !== "undefined") window.alert(`Could not save changes: ${message}`);
+      return loadContent(true);
+    });
+  return saveQueue;
+}
+
+function saveSection(sectionName) {
+  const value = cache[sectionName];
+  return persist(() => api.patch(`/content/${encodeURIComponent(sectionName)}`, { value }));
 }
 
 /**
  * Returns the merged content for a section. Order of precedence:
- *   1. localStorage override (if present)
+ *   1. saved override (if present)
  *   2. the static default passed in by the caller
  */
 export function getSection(sectionName, fallback) {
-  const raw = readRaw();
-  const override = raw && raw[sectionName];
+  const override = cache[sectionName];
   if (override == null) return fallback;
   if (typeof fallback !== "object" || fallback == null) {
     return override !== undefined ? override : fallback;
@@ -59,59 +85,78 @@ export function getSection(sectionName, fallback) {
 
 /** Get one item from a CMS-managed array by id. */
 export function getById(sectionName, id) {
-  const raw = readRaw();
-  const arr = raw && raw[sectionName];
+  const arr = cache[sectionName];
   if (!Array.isArray(arr)) return null;
   return arr.find((x) => String(x.id) === String(id)) || null;
 }
 
+/** Snapshot of every saved section (used for export). */
+export function getAllContent() {
+  return JSON.parse(JSON.stringify(cache));
+}
+
 /** Replace an entire section. Triggers the change event. */
 export function setSection(sectionName, value) {
-  const raw = readRaw() || {};
-  raw[sectionName] = value;
-  writeRaw(raw);
+  cache = { ...cache, [sectionName]: value };
+  emit();
+  return saveSection(sectionName);
 }
 
 /** Append to an array section. Returns the new id. */
 export function addItem(sectionName, item) {
-  const raw = readRaw() || {};
-  const list = Array.isArray(raw[sectionName]) ? raw[sectionName] : [];
+  const list = Array.isArray(cache[sectionName]) ? cache[sectionName] : [];
   const id = item.id ?? `${sectionName}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  raw[sectionName] = [{ ...item, id }, ...list];
-  writeRaw(raw);
+  cache = { ...cache, [sectionName]: [{ ...item, id }, ...list] };
+  emit();
+  saveSection(sectionName);
   return id;
 }
 
 /** Update a single item by id in an array section. */
 export function updateItem(sectionName, id, patch) {
-  const raw = readRaw() || {};
-  const list = Array.isArray(raw[sectionName]) ? raw[sectionName] : [];
+  const list = Array.isArray(cache[sectionName]) ? cache[sectionName] : [];
   let touched = false;
   const next = list.map((it) => {
     if (String(it.id) === String(id)) { touched = true; return { ...it, ...patch, id: it.id }; }
     return it;
   });
   if (!touched) return false;
-  raw[sectionName] = next;
-  writeRaw(raw);
+  cache = { ...cache, [sectionName]: next };
+  emit();
+  saveSection(sectionName);
   return true;
 }
 
 /** Remove an item by id from an array section. */
 export function removeItem(sectionName, id) {
-  const raw = readRaw() || {};
-  const list = Array.isArray(raw[sectionName]) ? raw[sectionName] : [];
-  raw[sectionName] = list.filter((it) => String(it.id) !== String(id));
-  writeRaw(raw);
+  const list = Array.isArray(cache[sectionName]) ? cache[sectionName] : [];
+  cache = { ...cache, [sectionName]: list.filter((it) => String(it.id) !== String(id)) };
+  emit();
+  return saveSection(sectionName);
+}
+
+/** Replace ALL saved sections with `sections` (used for import). */
+export function replaceAllContent(sections) {
+  cache = { ...sections };
+  emit();
+  return persist(async () => {
+    await api.delete("/content");
+    for (const [name, value] of Object.entries(sections)) {
+      await api.patch(`/content/${encodeURIComponent(name)}`, { value });
+    }
+  });
 }
 
 /** Wipe ALL admin overrides and restore the static defaults everywhere. */
-export function resetAllOverrides() { writeRaw(null); }
+export function resetAllOverrides() {
+  cache = {};
+  emit();
+  return persist(() => api.delete("/content"));
+}
 
 /** Returns true if any admin override exists. */
 export function hasOverrides() {
-  const raw = readRaw();
-  return raw != null && Object.keys(raw).length > 0;
+  return Object.keys(cache).length > 0;
 }
 
 /** Subscribe to change events. Returns an unsubscribe function. */
@@ -119,24 +164,30 @@ export function subscribe(handler) {
   if (typeof window === "undefined") return () => {};
   const wrap = (e) => handler(e);
   window.addEventListener(EVENT_NAME, wrap);
-  const wrapStorage = (e) => { if (e.key === STORAGE_KEY) handler(e); };
-  window.addEventListener("storage", wrapStorage);
-  return () => {
-    window.removeEventListener(EVENT_NAME, wrap);
-    window.removeEventListener("storage", wrapStorage);
-  };
+  return () => window.removeEventListener(EVENT_NAME, wrap);
 }
 
-import { useEffect, useState } from "react";
+/** React hook: `{ loaded, error, retry }` for the initial content load. */
+export function useContentStatus() {
+  const [value, setValue] = useState(status);
+  useEffect(() => {
+    const unsub = subscribe(() => setValue(status));
+    loadContent();
+    setValue(status);
+    return unsub;
+  }, []);
+  return { ...value, retry: () => loadContent(true) };
+}
 
 /**
  * React hook: returns the merged content for a section AND re-renders
- * the consumer whenever the admin writes a new override (in any tab).
+ * the consumer whenever the admin writes a new override.
  */
 export function useContentSection(sectionName, fallback) {
   const compute = () => getSection(sectionName, fallback);
   const [value, setValue] = useState(compute);
   useEffect(() => {
+    loadContent();
     setValue(compute());
     const unsub = subscribe(() => setValue(compute()));
     return unsub;
