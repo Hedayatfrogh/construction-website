@@ -15,7 +15,7 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { setUser, fetchUser, api } = useAuth();
+  const { setUser, api } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,7 +55,6 @@ const handleSubmit = async (e) => {
 
     saveToken(res.data.token);
     setUser(user);
-    await fetchUser();
     setIsLoading(false);
     if (user.role === "admin") {
       navigate(location.state?.from?.pathname || "/dashboard");

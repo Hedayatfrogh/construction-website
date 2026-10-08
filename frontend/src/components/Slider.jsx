@@ -3,6 +3,7 @@ import { useLanguage } from "../context/LanguageContext";
 import Hero from "./home/Hero";
 import Stats from "./home/Stats";
 import ServicesGrid from "./home/ServicesGrid";
+import MediaShowcase from "./home/MediaShowcase";
 import WhySMS from "./home/WhySMS";
 import SafetyQuality from "./home/SafetyQuality";
 import Sustainability from "./home/Sustainability";
@@ -20,6 +21,7 @@ export default function Slider() {
       <Hero />
       <Stats />
       <ServicesGrid />
+      <MediaShowcase />
       <WhySMS />
       <SafetyQuality />
       <Sustainability />
