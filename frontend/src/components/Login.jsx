@@ -12,15 +12,9 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("Admin@123456");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({
-    general: "Network error. Please check your connection.",
-  });
+  const [errors, setErrors] = useState({});
 
-<<<<<<< HEAD
-  const { setUser, api } = useAuth();
-=======
   const { login } = useAuth();
->>>>>>> 5bd4460d2e4320943266b8a62ca576eb0e21e1d6
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -67,28 +61,7 @@ export default function AdminLogin() {
     } finally {
       setIsLoading(false);
     }
-<<<<<<< HEAD
-
-    saveToken(res.data.token);
-    setUser(user);
-    setIsLoading(false);
-    if (user.role === "admin") {
-      navigate(location.state?.from?.pathname || "/dashboard");
-    } else {
-      navigate("/");
-    }
-  } catch (error) {
-    setIsLoading(false);
-    const errorMessage =
-      error.response?.data?.message ||
-      t("login.errGeneric");
-    console.error("Login error:", error.response?.data || error.message);
-    setErrors({ ...errors, general: errorMessage });
-  }
-};
-=======
   };
->>>>>>> 5bd4460d2e4320943266b8a62ca576eb0e21e1d6
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value.trim());

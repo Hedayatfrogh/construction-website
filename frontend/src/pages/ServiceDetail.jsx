@@ -10,16 +10,11 @@ import { useContentSection } from "../data/contentStore";
 
 export default function ServiceDetail() {
   const { slug } = useParams();
-<<<<<<< HEAD
-  const service = services.find((s) => s.slug === slug);
-  const { t } = useLanguage();
-  const location = useLocation();
-=======
   const { t, lang } = useLanguage();
+  const location = useLocation();
   const savedServices = useContentSection("services", null);
   const serviceList = Array.isArray(savedServices) ? savedServices : services;
   const service = serviceList.find((item) => item.slug === slug);
->>>>>>> 5bd4460d2e4320943266b8a62ca576eb0e21e1d6
   if (!service) return <Navigate to="/services" replace />;
 
   const translateOrSaved = (key, savedValue) => {

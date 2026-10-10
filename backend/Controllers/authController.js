@@ -89,18 +89,13 @@ exports.logIn = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide your email and password!', 400));
   }
 
-<<<<<<< HEAD
   const user = await User.findOne({ email: String(email).trim().toLowerCase() }).select('+password');
-  if (!user || !(await bcrypt.compare(String(password), user.password))) {
-=======
-  const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
   if (
     !user ||
     user.role !== 'admin' ||
     user.is_active === false ||
-    !(await bcrypt.compare(password, user.password))
+    !(await bcrypt.compare(String(password), user.password))
   ) {
->>>>>>> 5bd4460d2e4320943266b8a62ca576eb0e21e1d6
     return next(new AppError('Incorrect email or password!', 401));
   }
 

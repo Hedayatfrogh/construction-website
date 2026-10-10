@@ -43,14 +43,11 @@ export default function ServicesGrid() {
                   : s.summary;
             return (
               <Reveal key={s.slug} delay={i * 0.05}>
-<<<<<<< HEAD
-                <Link to={`/services/${s.slug}`} state={{ from: "/#services" }} className="sms-card group h-full flex flex-col p-6">
-=======
                 <Link
                   to={`/services/${s.slug}`}
+                  state={{ from: "/#services" }}
                   className="sms-card group h-full flex flex-col p-6"
                 >
->>>>>>> 5bd4460d2e4320943266b8a62ca576eb0e21e1d6
                   <div className="h-12 w-12 rounded-md bg-smsorange-50 text-smsorange-600 grid place-items-center group-hover:bg-smsorange-500 group-hover:text-white transition">
                     <IconByName name={s.icon} className="h-6 w-6" />
                   </div>
