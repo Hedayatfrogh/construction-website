@@ -1,8 +1,5 @@
-// Local development admin login. On startup (when NODE_ENV is not
-// "production") the backend makes sure this account exists in SQLite with
-// this password. Change the values here and restart the backend.
 module.exports = {
-  name: 'Admin',
-  email: 'admin@example.com',
-  password: 'Admin@123456',
+  name: process.env.SEED_ADMIN_NAME || 'Admin',
+  email: process.env.SEED_ADMIN_EMAIL || 'admin@example.com',
+  password: process.env.SEED_ADMIN_PASSWORD,
 };

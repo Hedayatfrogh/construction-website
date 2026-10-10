@@ -24,17 +24,22 @@ import { ArrowLeft, ChevronLeft } from "lucide-react";
 import PageHero from "../components/ui/PageHero";
 import IconByName from "../components/ui/IconByName";
 import CTASection from "../components/ui/CTASection";
-import { getEquipmentCategoryBySlug } from "../data/operations";
+import { equipmentCategories } from "../data/operations";
 import { useLanguage } from "../context/LanguageContext";
+import { useContentSection } from "../data/contentStore";
 
 export default function EquipmentCategory() {
   const { slug } = useParams();
   const { t, lang } = useLanguage();
+  const savedCategories = useContentSection("equipmentCategories", null);
+  const categories = Array.isArray(savedCategories)
+    ? savedCategories
+    : equipmentCategories;
 
   // Resolve the category from the URL slug. If the slug is unknown
   // (typo, stale bookmark, etc.) we render a friendly 404 state in the
   // current language instead of crashing.
-  const category = getEquipmentCategoryBySlug(slug);
+  const category = categories.find((item) => item.slug === slug);
 
   if (!category) {
     return (
@@ -67,15 +72,28 @@ export default function EquipmentCategory() {
   // the English `category.title` as the prefix — that's the contract the
   // existing EquipmentShowcase + Equipment grid already follow.
   const catKey = `equipmentCategories.${category.title}`;
-  const catTitle = t(`${catKey}.title`);
-  const itemNames = category.items.map((_it, i) => t(`${catKey}.items.${i}`));
-  const itemDescriptions = category.items.map((_it, i) =>
-    t(`${catKey}.descriptions.${i}`)
+  const translatedOr = (key, fallback) => {
+    const translated = t(key);
+    return translated === key ? fallback : translated;
+  };
+  const catTitle = translatedOr(`${catKey}.title`, category.title);
+  const itemNames = category.items.map((item, i) =>
+    translatedOr(`${catKey}.items.${i}`, item),
   );
-  const itemSpecs = category.items.map((_it, i) => t(`${catKey}.specs.${i}`));
-  const itemAvailability = category.items.map((_it, i) =>
-    t(`${catKey}.availability.${i}`)
-  );
+  const itemDescriptions = category.items.map((_item, i) => {
+    const value = t(`${catKey}.descriptions.${i}`);
+    return value === `${catKey}.descriptions.${i}` ? "" : value;
+  });
+  const itemSpecs = category.items.map((_item, i) => {
+    const value = t(`${catKey}.specs.${i}`);
+    return value === `${catKey}.specs.${i}` ? "" : value;
+  });
+  const itemAvailability = category.items.map((_item, i) => {
+    const value = t(`${catKey}.availability.${i}`);
+    return value === `${catKey}.availability.${i}`
+      ? t("equipmentDetail.statusAvailable")
+      : value;
+  });
 
   return (
     <>
@@ -122,22 +140,44 @@ export default function EquipmentCategory() {
           {/* Equipment table */}
           <div className="rounded-2xl border border-charcoal-100 bg-white overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm" dir={lang === "fa" ? "rtl" : "ltr"}>
+              <table
+                className="w-full text-sm"
+                dir={lang === "fa" ? "rtl" : "ltr"}
+              >
                 <thead className="bg-charcoal-50 text-charcoal-500 text-[11px] uppercase tracking-[0.18em]">
                   <tr>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right w-16">#</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">{t("equipmentDetail.tableImage")}</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">{t("equipmentDetail.tableEquipmentName")}</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">{t("equipmentDetail.tableCategory")}</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">{t("equipmentDetail.tableDescription")}</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right whitespace-nowrap">{t("equipmentDetail.tableAvailability")}</th>
-                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">{t("equipmentDetail.tableSpecifications")}</th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right w-16">
+                      #
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">
+                      {t("equipmentDetail.tableImage")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">
+                      {t("equipmentDetail.tableEquipmentName")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">
+                      {t("equipmentDetail.tableCategory")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">
+                      {t("equipmentDetail.tableDescription")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right whitespace-nowrap">
+                      {t("equipmentDetail.tableAvailability")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-left rtl:text-right">
+                      {t("equipmentDetail.tableSpecifications")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-charcoal-100">
                   {category.items.map((_raw, i) => (
-                    <tr key={`${lang}-${category.slug}-${i}`} className="hover:bg-charcoal-50/40">
-                      <td className="px-4 py-4 align-top text-charcoal-400 font-mono text-xs">{i + 1}</td>
+                    <tr
+                      key={`${lang}-${category.slug}-${i}`}
+                      className="hover:bg-charcoal-50/40"
+                    >
+                      <td className="px-4 py-4 align-top text-charcoal-400 font-mono text-xs">
+                        {i + 1}
+                      </td>
                       <td className="px-4 py-4 align-top">
                         {/* Placeholder image tile — neutral gradient that
                             adapts to dark/light mode. No user-facing copy. */}
@@ -145,7 +185,10 @@ export default function EquipmentCategory() {
                           className="h-12 w-12 rounded-md bg-gradient-to-br from-navy-700 to-navy-900 grid place-items-center text-smsgold-400"
                           aria-hidden="true"
                         >
-                          <IconByName name={category.icon} className="h-6 w-6" />
+                          <IconByName
+                            name={category.icon}
+                            className="h-6 w-6"
+                          />
                         </div>
                       </td>
                       <td className="px-4 py-4 align-top">
@@ -163,7 +206,8 @@ export default function EquipmentCategory() {
                         <span
                           className={[
                             "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-                            itemAvailability[i] === t("equipmentDetail.statusAvailable")
+                            itemAvailability[i] ===
+                            t("equipmentDetail.statusAvailable")
                               ? "bg-emerald-50 text-emerald-700"
                               : "bg-amber-50 text-amber-700",
                           ].join(" ")}
@@ -171,7 +215,8 @@ export default function EquipmentCategory() {
                           <span
                             className={[
                               "h-1.5 w-1.5 rounded-full",
-                              itemAvailability[i] === t("equipmentDetail.statusAvailable")
+                              itemAvailability[i] ===
+                              t("equipmentDetail.statusAvailable")
                                 ? "bg-emerald-500"
                                 : "bg-amber-500",
                             ].join(" ")}
@@ -191,7 +236,10 @@ export default function EquipmentCategory() {
 
           {/* Back link below the table for long tables */}
           <div className="mt-8">
-            <Link to="/equipment" className="sms-btn-ghost inline-flex items-center gap-2">
+            <Link
+              to="/equipment"
+              className="sms-btn-ghost inline-flex items-center gap-2"
+            >
               <ArrowLeft className="h-4 w-4 rtl-flip-x" />
               {t("equipmentDetail.backToAll")}
             </Link>
@@ -199,7 +247,10 @@ export default function EquipmentCategory() {
         </div>
       </section>
 
-      <CTASection title={t("equipment.ctaTitle")} subtitle={t("equipment.ctaSubtitle")} />
+      <CTASection
+        title={t("equipment.ctaTitle")}
+        subtitle={t("equipment.ctaSubtitle")}
+      />
     </>
   );
 }

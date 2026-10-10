@@ -23,6 +23,18 @@ const User = defineModel('User', 'users', {
     enum: ['user', 'admin'],
     default: 'admin',
   },
+  tokenVersion: {
+    type: 'string',
+    default: '0',
+  },
+  is_active: {
+    type: 'boolean',
+    default: true,
+  },
+  is_super_admin: {
+    type: 'boolean',
+    default: false,
+  },
 });
 
 module.exports = User;

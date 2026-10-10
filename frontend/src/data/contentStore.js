@@ -20,7 +20,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from "react";
-import { api } from "../context/AuthContext";
+import api from "../api";
 
 const EVENT_NAME = "sms:content-changed";
 
@@ -37,7 +37,8 @@ function emit() {
 /** Fetch every section from the backend. Pass `force` to refetch. */
 export function loadContent(force = false) {
   if (loadPromise && !force) return loadPromise;
-  loadPromise = api.get("/content")
+  loadPromise = api
+    .get("/content")
     .then((res) => {
       cache = res.data?.data?.sections || {};
       status = { loaded: true, error: null };
@@ -51,14 +52,13 @@ export function loadContent(force = false) {
 }
 
 function persist(request) {
-  saveQueue = saveQueue
+  const operation = saveQueue
+    .catch(() => {})
     .then(request)
-    .catch((err) => {
-      const message = err.response?.data?.message || err.message || "Unknown error";
-      console.error("Failed to save content:", message);
-      if (typeof window !== "undefined") window.alert(`Could not save changes: ${message}`);
-      return loadContent(true);
-    });
+  saveQueue = operation.catch(async (error) => {
+    await loadContent(true);
+    throw error;
+  });
   return saveQueue;
 }
 
@@ -103,17 +103,17 @@ export function setSection(sectionName, value) {
 }
 
 /** Append to an array section. Returns the new id. */
-export function addItem(sectionName, item) {
+export async function addItem(sectionName, item) {
   const list = Array.isArray(cache[sectionName]) ? cache[sectionName] : [];
   const id = item.id ?? `${sectionName}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   cache = { ...cache, [sectionName]: [{ ...item, id }, ...list] };
   emit();
-  saveSection(sectionName);
+  await saveSection(sectionName);
   return id;
 }
 
 /** Update a single item by id in an array section. */
-export function updateItem(sectionName, id, patch) {
+export async function updateItem(sectionName, id, patch) {
   const list = Array.isArray(cache[sectionName]) ? cache[sectionName] : [];
   let touched = false;
   const next = list.map((it) => {
@@ -123,7 +123,7 @@ export function updateItem(sectionName, id, patch) {
   if (!touched) return false;
   cache = { ...cache, [sectionName]: next };
   emit();
-  saveSection(sectionName);
+  await saveSection(sectionName);
   return true;
 }
 

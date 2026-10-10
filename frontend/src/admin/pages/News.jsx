@@ -1,6 +1,6 @@
 // admin/pages/News.jsx
 import CrudManager from "./CrudManager";
-import { Field, TextInput, TextArea, Select, Checkbox, TagInput, Badge } from "../adminUI";
+import { Field, TextInput, ImageInput, TextArea, Select, Checkbox, TagInput, Badge } from "../adminUI";
 import { EMPTY_NEWS_ARTICLE, NEWS_CATEGORIES } from "../../data/adminSeed";
 import { Newspaper } from "lucide-react";
 import { format } from "date-fns";
@@ -42,7 +42,7 @@ function ArticleForm({ item, setItem }) {
           <TextInput type="datetime-local" value={item.publishedAt ? item.publishedAt.slice(0, 16) : ""} onChange={(e) => setItem({ ...item, publishedAt: e.target.value ? new Date(e.target.value).toISOString() : "" })} />
         </Field>
         <Field label="Cover image URL">
-          <TextInput value={item.coverImage} onChange={(e) => setItem({ ...item, coverImage: e.target.value })} />
+          <ImageInput value={item.coverImage} onChange={(url) => setItem({ ...item, coverImage: url })} />
         </Field>
       </div>
       <Field label="Excerpt" hint="One or two sentences shown in article lists">

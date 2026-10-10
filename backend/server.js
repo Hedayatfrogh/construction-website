@@ -29,53 +29,62 @@ const adminCredentials = require('./config/adminCredentials');
 // Open (or create) the local SQLite database and its tables
 connectDB();
 
-// Keep the hardcoded local admin (config/adminCredentials.js) in sync.
+// Create the local admin once without resetting a password changed in the UI.
 const ensureLocalAdmin = async () => {
   if (process.env.NODE_ENV === 'production') return;
-  const existing = await User.findOne({ email: adminCredentials.email }).select('+password');
+  const existing = await User.findOne({ email: adminCredentials.email });
   if (!existing) {
+    if (!adminCredentials.password) {
+      console.warn(
+        'Local admin was not created. Set SEED_ADMIN_PASSWORD to configure one.',
+      );
+      return;
+    }
     await User.create({
       name: adminCredentials.name,
       email: adminCredentials.email,
       password: await bcrypt.hash(adminCredentials.password, 12),
       role: 'admin',
+      is_active: true,
+      is_super_admin: true,
     });
-  } else if (
-    existing.role !== 'admin' ||
-    !(await bcrypt.compare(adminCredentials.password, existing.password))
-  ) {
+  } else if (existing.role !== 'admin' || !existing.is_super_admin) {
     await User.findByIdAndUpdate(existing._id, {
-      password: await bcrypt.hash(adminCredentials.password, 12),
       role: 'admin',
+      is_active: true,
+      is_super_admin: true,
     });
   }
-  console.log(`Local admin login: ${adminCredentials.email} / ${adminCredentials.password}`);
+  console.log(`Local admin account is ready: ${adminCredentials.email}`);
 };
-
-ensureLocalAdmin().catch((err) => console.error('Failed to create local admin:', err.message));
 
 const port = process.env.PORT || 2000;
 // Bind explicitly to 0.0.0.0 so the server is reachable from other devices
 // on the same local network (LAN), not just from localhost.
 const host = process.env.HOST || '0.0.0.0';
 
-app.listen(port, host, () => {
-  console.log(`App running on port ${port}...`);
-  console.log(`Bound to host: ${host}`);
+const startServer = async () => {
+  await ensureLocalAdmin();
+  app.listen(port, host, () => {
+    console.log(`App running on port ${port}...`);
+    console.log(`Bound to host: ${host}`);
 
-  // Print every LAN URL the server is reachable at so users on the
-  // same Wi-Fi can open it directly from their phone / other PC.
-  const interfaces = os.networkInterfaces();
-  const printed = new Set();
-  console.log('\nLocal network URLs (open from any device on the same Wi-Fi/LAN):');
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name] || []) {
-      // Skip internal (loopback) and non-IPv4 addresses
-      if (iface.internal || iface.family !== 'IPv4') continue;
-      if (printed.has(iface.address)) continue;
-      printed.add(iface.address);
-      console.log(`  http://${iface.address}:${port}`);
+    const interfaces = os.networkInterfaces();
+    const printed = new Set();
+    console.log('\nLocal network URLs (open from any device on the same Wi-Fi/LAN):');
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name] || []) {
+        if (iface.internal || iface.family !== 'IPv4') continue;
+        if (printed.has(iface.address)) continue;
+        printed.add(iface.address);
+        console.log(`  http://${iface.address}:${port}`);
+      }
     }
-  }
-  console.log(`  http://localhost:${port}  (this machine only)\n`);
+    console.log(`  http://localhost:${port}  (this machine only)\n`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error('Backend startup failed:', error.message);
+  process.exit(1);
 });

@@ -170,6 +170,13 @@ const defineModel = (name, table, fields) => {
         .forEach((c) => {
           db.exec(`ALTER TABLE ${quoted(table)} ADD COLUMN ${quoted(c)} ${SQL_TYPES[fields[c].type] || 'TEXT'}`);
         });
+      columns.forEach((c) => {
+        const def = fields[c];
+        if (def.default === undefined) return;
+        const value = typeof def.default === 'function' ? def.default() : def.default;
+        db.prepare(`UPDATE ${quoted(table)} SET ${quoted(c)} = ? WHERE ${quoted(c)} IS NULL`)
+          .run(toColumn(def, castValue(c, def, value)));
+      });
       tableReady = true;
     },
 

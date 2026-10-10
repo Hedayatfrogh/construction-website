@@ -112,16 +112,11 @@ export const strategicPlans = [
 ];
 
 export const navLinks = [
-  { label: "Home",            to: "/" },
-  { label: "About",           to: "/about" },
-  { label: "Services",        to: "/services" },
-  { label: "Projects",        to: "/projects" },
-  { label: "Equipment",       to: "/equipment" },
-  { label: "Team",            to: "/team" },
-  { label: "Safety & Quality",to: "/safety-quality" },
-  { label: "Sustainability", to: "/sustainability" },
-  { label: "Methodology",     to: "/methodology" },
-  { label: "Clients",         to: "/clients" },
-  { label: "News",            to: "/news" },
-  { label: "Contact",         to: "/contact" },
+  { label: "Home",      to: "/" },
+  { label: "Services",  to: "/services" },
+  { label: "Projects",  to: "/projects" },
+  { label: "Team",      to: "/team" },
+  { label: "Customers", to: "/clients" },
+  { label: "About",     to: "/about" },
+  { label: "Contact",   to: "/contact" },
 ];

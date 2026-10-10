@@ -8,6 +8,7 @@ build/
 # Environment files (never commit real secrets)
 .env
 .env.*
+!.env.example
 config.env
 *.local
 
