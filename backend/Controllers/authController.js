@@ -126,7 +126,7 @@ exports.logIn = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide your email and password!', 400));
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email: String(email).trim().toLowerCase() }).select('+password');
   if (!user || !(await bcrypt.compare(String(password), user.password))) {
     return next(new AppError('Incorrect email or password!', 401));
   }

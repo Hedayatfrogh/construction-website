@@ -606,3 +606,6 @@ img, svg, video, canvas, iframe {
   }
 }
 
+
+/* MediaSlider: active-dot countdown fill */
+@keyframes sms-dot-progress { from { width: 0%; } to { width: 100%; } }

@@ -12,7 +12,7 @@ export default function ServicesGrid() {
   // back to the English data file values when a key is missing.
   const tr = (slug, field) => t(`services.${slug}.${field}`);
   return (
-    <section className="sms-section bg-white">
+    <section id="services" className="sms-section bg-white scroll-mt-24">
       <div className="sms-container">
         <div className="flex flex-col items-center gap-6 mb-12">
           <SectionHeader
@@ -29,7 +29,7 @@ export default function ServicesGrid() {
             const summary = tr(s.slug, "summary") !== `services.${s.slug}.summary` ? tr(s.slug, "summary") : s.summary;
             return (
               <Reveal key={s.slug} delay={i * 0.05}>
-                <Link to={`/services/${s.slug}`} className="sms-card group h-full flex flex-col p-6">
+                <Link to={`/services/${s.slug}`} state={{ from: "/#services" }} className="sms-card group h-full flex flex-col p-6">
                   <div className="h-12 w-12 rounded-md bg-smsorange-50 text-smsorange-600 grid place-items-center group-hover:bg-smsorange-500 group-hover:text-white transition">
                     <IconByName name={s.icon} className="h-6 w-6" />
                   </div>
