@@ -5,8 +5,9 @@
 // visually consistent without dragging the public site's chrome in.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Plus, Save, X, Trash2, Edit3, Star, Eye, EyeOff, Search, Check } from "lucide-react";
+import { Plus, Save, X, Trash2, Edit3, Star, Eye, EyeOff, Search, Check, Upload } from "lucide-react";
 import { useState } from "react";
+import api from "../api";
 
 // ── PageHeader ───────────────────────────────────────────────────────────
 export function PageHeader({ title, subtitle, action }) {
@@ -61,6 +62,43 @@ export const inputCls = (err) =>
 
 export function TextInput(props) {
   return <input {...props} className={`${inputCls(props.error)} ${props.className || ""}`} />;
+}
+
+// URL input with an "Upload" button that stores the file via /admin/media/upload.
+export function ImageInput({ value, onChange, placeholder = "https://..." }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const upload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await api.post("/admin/media/upload", formData, { timeout: 60000 });
+      onChange(res.data?.data?.url || "");
+    } catch (err) {
+      setError(err.response?.data?.message || "Image upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input value={value || ""} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={inputCls()} />
+        <label className={`${btnBase} shrink-0 px-3 py-2 text-sm border border-charcoal-200 text-charcoal-700 hover:bg-charcoal-50 cursor-pointer ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          <Upload className="h-4 w-4" />
+          {uploading ? "…" : "Upload"}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" className="hidden" onChange={upload} disabled={uploading} />
+        </label>
+      </div>
+      {value && <img src={value} alt="" className="mt-2 h-16 w-24 rounded-md object-cover border border-charcoal-200" />}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </div>
+  );
 }
 
 export function TextArea({ rows = 4, ...props }) {

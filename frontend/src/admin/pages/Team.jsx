@@ -1,6 +1,6 @@
 // admin/pages/Team.jsx
 import CrudManager from "./CrudManager";
-import { Field, TextInput, TextArea, Select, Checkbox, Badge } from "../adminUI";
+import { Field, TextInput, ImageInput, TextArea, Select, Checkbox, Badge } from "../adminUI";
 import { EMPTY_TEAM_MEMBER, TEAM_DEPARTMENTS } from "../../data/adminSeed";
 import { Users } from "lucide-react";
 
@@ -47,7 +47,7 @@ function TeamForm({ item, setItem }) {
           <TextInput value={item.phone} onChange={(e) => setItem({ ...item, phone: e.target.value })} />
         </Field>
         <Field label="Photo URL" hint="Square JPG/PNG recommended">
-          <TextInput value={item.photo} onChange={(e) => setItem({ ...item, photo: e.target.value })} placeholder="https://..." />
+          <ImageInput value={item.photo} onChange={(url) => setItem({ ...item, photo: url })} />
         </Field>
       </div>
       <Field label="Biography">

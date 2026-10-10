@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Slider from "./components/Slider";
 import Footer from "./components/Footer";
@@ -10,6 +15,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
 import LogIn from "./components/Login.jsx";
+import PasswordRecovery from "./components/PasswordRecovery.jsx";
 import AdminProtect from "../Protect/AdminProtect.jsx";
 import Dashboard from "./components/Dashboard/page.jsx";
 
@@ -28,32 +34,43 @@ import AdminEquipment from "./admin/pages/Equipment";
 import AdminHomepage from "./admin/pages/Homepage";
 import AdminMedia from "./admin/pages/Media";
 import AdminSettings from "./admin/pages/Settings";
+import AdminUsers from "./admin/pages/AdminUsers";
+import AdminAbout from "./admin/pages/AboutContent";
+import AdminContact from "./admin/pages/ContactContent";
+import AdminSustainability from "./admin/pages/SustainabilityContent";
+import AdminMethodology from "./admin/pages/MethodologyContent";
+import AdminUpcoming from "./admin/pages/UpcomingContent";
 import AdminNotFound from "./admin/AdminNotFound";
 
 // Public pages
-import About          from "./pages/About.jsx";
-import Services       from "./pages/Services.jsx";
-import ServiceDetail  from "./pages/ServiceDetail.jsx";
-import Projects       from "./pages/Projects.jsx";
-import Equipment      from "./pages/Equipment.jsx";
+import About from "./pages/About.jsx";
+import Services from "./pages/Services.jsx";
+import ServiceDetail from "./pages/ServiceDetail.jsx";
+import Projects from "./pages/Projects.jsx";
+import Equipment from "./pages/Equipment.jsx";
 import EquipmentCategory from "./pages/EquipmentCategory.jsx";
-import Team           from "./pages/Team.jsx";
-import Clients        from "./pages/Clients.jsx";
-import SafetyQuality  from "./pages/SafetyQuality.jsx";
+import Team from "./pages/Team.jsx";
+import Clients from "./pages/Clients.jsx";
+import SafetyQuality from "./pages/SafetyQuality.jsx";
 import Sustainability from "./pages/Sustainability.jsx";
-import Methodology    from "./pages/Methodology.jsx";
-import Organization   from "./pages/Organization.jsx";
+import Methodology from "./pages/Methodology.jsx";
+import Organization from "./pages/Organization.jsx";
 import StrategicPlans from "./pages/StrategicPlans.jsx";
 import ExpansionGoals from "./pages/ExpansionGoals.jsx";
 import UpcomingProjects from "./pages/UpcomingProjects.jsx";
-import News           from "./pages/News.jsx";
-import Contact        from "./pages/Contact.jsx";
+import News from "./pages/News.jsx";
+import Contact from "./pages/Contact.jsx";
+import Careers from "./pages/Careers.jsx";
 
 // Show the public Navbar + Footer ONLY on public routes. Admin and
 // Login get a clean full-screen experience via their own layouts.
 function PublicChrome({ children }) {
   const { pathname } = useLocation();
-  const isFullScreen = pathname.startsWith("/admin") || pathname === "/login";
+  const isFullScreen =
+    pathname.startsWith("/admin") ||
+    pathname === "/login" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
   if (isFullScreen) return <>{children}</>;
   return (
     <>
@@ -71,64 +88,114 @@ function App() {
         <AuthProvider>
           <ModalProvider>
             <Router>
-            <ScrollToTop />
-            <PublicChrome>
-            <Routes>
-              <Route path="/" element={<Slider />} />
+              <ScrollToTop />
+              <PublicChrome>
+                <Routes>
+                  <Route path="/" element={<Slider />} />
 
-              <Route path="/about"              element={<About />} />
-              <Route path="/services"           element={<Services />} />
-              <Route path="/services/:slug"     element={<ServiceDetail />} />
-              <Route path="/projects"           element={<Projects />} />
-              <Route path="/equipment"          element={<Equipment />} />
-              {/* Dedicated equipment category pages — one component, six routes.
+                  <Route path="/about" element={<About />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/:slug" element={<ServiceDetail />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/equipment" element={<Equipment />} />
+                  {/* Dedicated equipment category pages — one component, six routes.
                   The :slug parameter resolves to the matching category in
                   data/operations.js via getEquipmentCategoryBySlug(). */}
-              <Route path="/equipment/earthmoving"          element={<EquipmentCategory />} />
-              <Route path="/equipment/concrete-road"        element={<EquipmentCategory />} />
-              <Route path="/equipment/material-handling"    element={<EquipmentCategory />} />
-              <Route path="/equipment/drilling-foundation"  element={<EquipmentCategory />} />
-              <Route path="/equipment/demolition-finishing" element={<EquipmentCategory />} />
-              <Route path="/equipment/other-equipment"      element={<EquipmentCategory />} />
-              <Route path="/team"               element={<Team />} />
-              <Route path="/clients"            element={<Clients />} />
-              <Route path="/safety-quality"     element={<SafetyQuality />} />
-              <Route path="/sustainability"     element={<Sustainability />} />
-              <Route path="/methodology"        element={<Methodology />} />
-              <Route path="/organization"       element={<Organization />} />
-              <Route path="/strategic-plans"    element={<StrategicPlans />} />
-              <Route path="/expansion-goals"    element={<ExpansionGoals />} />
-              <Route path="/upcoming-projects"  element={<UpcomingProjects />} />
-              <Route path="/news"               element={<News />} />
-              <Route path="/contact"            element={<Contact />} />
+                  <Route
+                    path="/equipment/earthmoving"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route
+                    path="/equipment/concrete-road"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route
+                    path="/equipment/material-handling"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route
+                    path="/equipment/drilling-foundation"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route
+                    path="/equipment/demolition-finishing"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route
+                    path="/equipment/other-equipment"
+                    element={<EquipmentCategory />}
+                  />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/clients" element={<Clients />} />
+                  <Route path="/safety-quality" element={<SafetyQuality />} />
+                  <Route path="/sustainability" element={<Sustainability />} />
+                  <Route path="/methodology" element={<Methodology />} />
+                  <Route path="/organization" element={<Organization />} />
+                  <Route path="/strategic-plans" element={<StrategicPlans />} />
+                  <Route path="/expansion-goals" element={<ExpansionGoals />} />
+                  <Route
+                    path="/upcoming-projects"
+                    element={<UpcomingProjects />}
+                  />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/careers" element={<Careers />} />
 
-              {/* Auth + Admin (existing) */}
-              <Route path="/login" element={<LogIn />} />
-              <Route path="/dashboard" element={
-                <AdminProtect>
-                  <Dashboard />
-                </AdminProtect>
-              } />
+                  {/* Auth + Admin (existing) */}
+                  <Route path="/login" element={<LogIn />} />
+                  <Route
+                    path="/forgot-password"
+                    element={<PasswordRecovery />}
+                  />
+                  <Route
+                    path="/reset-password"
+                    element={<PasswordRecovery />}
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <AdminProtect>
+                        <Dashboard />
+                      </AdminProtect>
+                    }
+                  />
 
-              {/* ── Admin panel at /admin (guarded, own layout) ──────── */}
-              <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
-                <Route index                            element={<AdminOverview />} />
-                <Route path="messages"                 element={<AdminMessages />} />
-                <Route path="projects"                 element={<AdminProjects />} />
-                <Route path="team"                     element={<AdminTeam />} />
-                <Route path="clients"                  element={<AdminClients />} />
-                <Route path="news"                     element={<AdminNews />} />
-                <Route path="jobs"                     element={<AdminJobs />} />
-                <Route path="services"                 element={<AdminServices />} />
-                <Route path="equipment"                element={<AdminEquipment />} />
-                <Route path="homepage"                 element={<AdminHomepage />} />
-                <Route path="media"                    element={<AdminMedia />} />
-                <Route path="settings"                 element={<AdminSettings />} />
-                <Route path="*"                        element={<AdminNotFound />} />
-              </Route>
-            </Routes>
-            </PublicChrome>
-          </Router>
+                  {/* ── Admin panel at /admin (guarded, own layout) ──────── */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminGuard>
+                        <AdminLayout />
+                      </AdminGuard>
+                    }
+                  >
+                    <Route index element={<AdminOverview />} />
+                    <Route path="dashboard" element={<AdminOverview />} />
+                    <Route path="messages" element={<AdminMessages />} />
+                    <Route path="projects" element={<AdminProjects />} />
+                    <Route path="team" element={<AdminTeam />} />
+                    <Route path="clients" element={<AdminClients />} />
+                    <Route path="news" element={<AdminNews />} />
+                    <Route path="jobs" element={<AdminJobs />} />
+                    <Route path="services" element={<AdminServices />} />
+                    <Route path="equipment" element={<AdminEquipment />} />
+                    <Route path="homepage" element={<AdminHomepage />} />
+                    <Route path="about" element={<AdminAbout />} />
+                    <Route path="contact" element={<AdminContact />} />
+                    <Route
+                      path="sustainability"
+                      element={<AdminSustainability />}
+                    />
+                    <Route path="methodology" element={<AdminMethodology />} />
+                    <Route path="upcoming" element={<AdminUpcoming />} />
+                    <Route path="media" element={<AdminMedia />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="*" element={<AdminNotFound />} />
+                  </Route>
+                </Routes>
+              </PublicChrome>
+            </Router>
           </ModalProvider>
         </AuthProvider>
       </ThemeProvider>

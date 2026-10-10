@@ -3,12 +3,17 @@ import { motion } from "framer-motion";
 import { ArrowRight, Phone, PlayCircle } from "lucide-react";
 import { company } from "../../data/company";
 import { useLanguage } from "../../context/LanguageContext";
+import { useContentSection } from "../../data/contentStore";
 
 export default function Hero() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const companyContent = useContentSection("company", company);
   // Tagline from the dictionary so it splits naturally into two visual lines
   // for both English ("X, Y") and Dari (", " separator keeps the layout).
-  const tagline = t("brand.tagline");
+  const tagline =
+    lang === "en"
+      ? companyContent.tagline || t("brand.tagline")
+      : t("brand.tagline");
   const taglineParts = tagline.split(",");
 
   return (
@@ -22,8 +27,13 @@ export default function Hero() {
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal-950/85 via-charcoal-900/75 to-charcoal-950/95" />
-        <div className="absolute inset-0 opacity-30"
-             style={{ backgroundImage: "radial-gradient(circle at 20% 30%, rgba(247,107,10,0.35), transparent 50%), radial-gradient(circle at 80% 60%, rgba(29,44,76,0.6), transparent 50%)" }} />
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 30%, rgba(247,107,10,0.35), transparent 50%), radial-gradient(circle at 80% 60%, rgba(29,44,76,0.6), transparent 50%)",
+          }}
+        />
       </div>
 
       <div className="sms-container relative py-24 md:py-36 lg:py-44">
@@ -34,7 +44,10 @@ export default function Hero() {
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-smsgold-300 backdrop-blur"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-smsorange-500 animate-pulse" />
-          {t("home.heroBadge", company.established)}
+          {t(
+            "home.heroBadge",
+            companyContent.established || company.established,
+          )}
         </motion.span>
 
         <motion.h1
@@ -55,7 +68,9 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-6 text-base md:text-lg text-white/75 max-w-2xl leading-relaxed"
         >
-          {t("heroIntro")}
+          {lang === "en"
+            ? companyContent.heroIntro || t("heroIntro")
+            : t("heroIntro")}
         </motion.p>
 
         <motion.div
@@ -64,14 +79,41 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="mt-10 flex flex-wrap items-center gap-3"
         >
-          <Link to="/services" className="sms-btn-primary">
-            {t("home.heroExploreServices")} <ArrowRight className="h-4 w-4" />
+          <Link
+            to={
+              lang === "en"
+                ? companyContent.heroPrimaryLink || "/services"
+                : "/services"
+            }
+            className="sms-btn-primary"
+          >
+            {lang === "en"
+              ? companyContent.heroPrimaryButton ||
+                t("home.heroExploreServices")
+              : t("home.heroExploreServices")}{" "}
+            <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link to="/projects" className="sms-btn-secondary">
-            <PlayCircle className="h-4 w-4" /> {t("home.heroViewProjects")}
+          <Link
+            to={
+              lang === "en"
+                ? companyContent.heroSecondaryLink || "/projects"
+                : "/projects"
+            }
+            className="sms-btn-secondary"
+          >
+            <PlayCircle className="h-4 w-4" />{" "}
+            {lang === "en"
+              ? companyContent.heroSecondaryButton || t("home.heroViewProjects")
+              : t("home.heroViewProjects")}
           </Link>
-          <Link to="/contact" className="text-sm font-semibold text-white/80 hover:text-white inline-flex items-center gap-2 ml-1">
-            <Phone className="h-4 w-4" /> {t("home.heroContactUs")}
+          <Link
+            to="/contact"
+            className="text-sm font-semibold text-white/80 hover:text-white inline-flex items-center gap-2 ml-1"
+          >
+            <Phone className="h-4 w-4" />{" "}
+            {lang === "en"
+              ? companyContent.heroContactButton || t("home.heroContactUs")
+              : t("home.heroContactUs")}
           </Link>
         </motion.div>
 
@@ -83,13 +125,31 @@ export default function Hero() {
           className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl"
         >
           {[
-            { k: t("stats.foundedShort"), v: company.established },
-            { k: t("stats.regShort"),      v: company.registrationNumber },
-            { k: t("stats.licenseShort"),  v: company.licenseNumber },
-            { k: t("stats.tinShort"),      v: company.tinNumber },
+            {
+              k: t("stats.foundedShort"),
+              v: companyContent.established || company.established,
+            },
+            {
+              k: t("stats.regShort"),
+              v:
+                companyContent.registrationNumber || company.registrationNumber,
+            },
+            {
+              k: t("stats.licenseShort"),
+              v: companyContent.licenseNumber || company.licenseNumber,
+            },
+            {
+              k: t("stats.tinShort"),
+              v: companyContent.tinNumber || company.tinNumber,
+            },
           ].map((it) => (
-            <div key={it.k} className="rounded-md border border-white/10 bg-white/5 backdrop-blur px-4 py-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-smsgold-300">{it.k}</div>
+            <div
+              key={it.k}
+              className="rounded-md border border-white/10 bg-white/5 backdrop-blur px-4 py-3"
+            >
+              <div className="text-[10px] uppercase tracking-[0.2em] text-smsgold-300">
+                {it.k}
+              </div>
               <div className="mt-1 font-display font-bold text-lg">{it.v}</div>
             </div>
           ))}

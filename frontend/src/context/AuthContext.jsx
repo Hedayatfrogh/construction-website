@@ -1,89 +1,95 @@
-// AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import api, { clearAccessToken, setAccessToken } from "../api";
 
 export const AuthContext = createContext();
-
-// Use a relative `/api/v1` URL so requests go through Vite's dev proxy
-// (configured in vite.config.js -> `server.proxy['/api']`). This means the
-// same frontend bundle works from `localhost`, `127.0.0.1`, or any LAN IP
-// (`http://192.168.x.x:5173`) without needing to rebuild for each host.
-//
-// To override at build time (e.g. for a deployed build pointing at a
-// different API), set `VITE_API_BASE_URL` before running `npm run build`.
-const baseURL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? "/api/v1" : "https://construction-website-v4cp.onrender.com/api/v1");
-export const api = axios.create({
-  baseURL,
-  withCredentials: true,
-  timeout: 10000,
-});
-
-const TOKEN_KEY = "sms.auth.token";
-export const saveToken = (token) => {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
-};
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = async (attempt = 0) => {
-    // A login/logout that happens while this request is in flight changes the
-    // token; the stale response must not overwrite the newer auth state.
-    const token = localStorage.getItem(TOKEN_KEY);
-    const isStale = () => localStorage.getItem(TOKEN_KEY) !== token;
+    const tokenAtStart = window.sessionStorage.getItem("sms.admin.token");
+    let superseded = false;
+    let retrying = false;
     try {
       const res = await api.get("/users/me");
-      if (isStale()) return;
-      setUser(res.data.status === "success" ? res.data.data.user : null);
+      if (window.sessionStorage.getItem("sms.admin.token") !== tokenAtStart) {
+        superseded = true;
+        return;
+      }
+      if (
+        res.data.status === "success" &&
+        res.data.data.user?.role === "admin"
+      ) {
+        setUser(res.data.data.user);
+      } else {
+        clearAccessToken();
+        setUser(null);
+      }
     } catch (error) {
-      if (isStale()) return;
+      if (window.sessionStorage.getItem("sms.admin.token") !== tokenAtStart) {
+        superseded = true;
+        return;
+      }
       const status = error.response?.status;
       if ((!status || status >= 500) && attempt < 2) {
+        retrying = true;
         await new Promise((r) => setTimeout(r, 1000));
         return fetchUser(attempt + 1);
       }
-      if (status === 401) saveToken(null);
+      if (tokenAtStart) clearAccessToken();
       setUser(null);
+    } finally {
+      if (!superseded && !retrying) setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
-    if (!user) {
-      fetchUser(); // Only fetch if no user is set
-    } else {
-      setIsLoading(false); // Skip loading if user is already set
+    fetchUser();
+    const onExpired = () => {
+      setUser(null);
+      setIsLoading(false);
+    };
+    window.addEventListener("sms:auth-expired", onExpired);
+    return () => window.removeEventListener("sms:auth-expired", onExpired);
+  }, []);
+
+  const login = async (credentials) => {
+    const res = await api.post("/users/login", credentials);
+    const token = res.data?.token;
+    const authenticatedUser = res.data?.data?.user;
+
+    if (!token || authenticatedUser?.role !== "admin") {
+      throw new Error(
+        "The server did not return a valid administrator session.",
+      );
     }
-  }, [user]); // Depend on user state
+
+    setAccessToken(token);
+    setUser(authenticatedUser);
+    setIsLoading(false);
+    return authenticatedUser;
+  };
 
   const logout = async () => {
     try {
       await api.post("/users/logout");
-      saveToken(null);
-      setUser(null);
       return { success: true };
     } catch (error) {
-      saveToken(null);
-      setUser(null);
       return {
         success: false,
         error: error.response?.data?.message || "Failed to log out",
       };
+    } finally {
+      clearAccessToken();
+      setUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, isLoading, fetchUser, api }}>
+    <AuthContext.Provider
+      value={{ user, setUser, login, logout, isLoading, fetchUser, api }}
+    >
       {children}
     </AuthContext.Provider>
   );

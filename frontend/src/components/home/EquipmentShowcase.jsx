@@ -5,9 +5,14 @@ import SectionHeader from "../ui/SectionHeader";
 import Reveal from "../ui/Reveal";
 import IconByName from "../ui/IconByName";
 import { useLanguage } from "../../context/LanguageContext";
+import { useContentSection } from "../../data/contentStore";
 
 export default function EquipmentShowcase() {
   const { t, lang } = useLanguage();
+  const savedCategories = useContentSection("equipmentCategories", null);
+  const categories = Array.isArray(savedCategories)
+    ? savedCategories
+    : equipmentCategories;
   return (
     <section className="sms-section bg-charcoal-50">
       <div className="sms-container">
@@ -21,16 +26,21 @@ export default function EquipmentShowcase() {
           />
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {equipmentCategories.map((cat, i) => {
+          {categories.map((cat, i) => {
             // Translated card heading + each equipment item.
             // Key shape:
             //   t(`equipmentCategories.${cat.title}.title`)
             //   t(`equipmentCategories.${cat.title}.items.${idx}`)
             // `cat.title` is the English title from data/operations.js, which
             // matches the dictionary keys.
-            const cardTitle = t(`equipmentCategories.${cat.title}.title`);
-            const translatedItems = cat.items.map((_it, idx) =>
-              t(`equipmentCategories.${cat.title}.items.${idx}`)
+            const cardTitle =
+              lang === "en" && Array.isArray(savedCategories)
+                ? cat.title
+                : t(`equipmentCategories.${cat.title}.title`);
+            const translatedItems = cat.items.map((item, idx) =>
+              lang === "en" && Array.isArray(savedCategories)
+                ? item
+                : t(`equipmentCategories.${cat.title}.items.${idx}`),
             );
             // Each card is now a real <Link> to its dedicated detail page
             // (`/equipment/<slug>`), implemented by EquipmentCategory.jsx.
@@ -47,11 +57,19 @@ export default function EquipmentShowcase() {
                     <div className="sms-hover-target sms-hover-target--icon h-11 w-11 rounded-md bg-navy-700 group-hover:bg-navy-600 text-smsgold-400 grid place-items-center">
                       <IconByName name={cat.icon} className="h-6 w-6" />
                     </div>
-                    <h3 className="sms-hover-target sms-hover-target--title font-display font-bold text-charcoal-900">{cardTitle}</h3>
+                    <h3 className="sms-hover-target sms-hover-target--title font-display font-bold text-charcoal-900">
+                      {cardTitle}
+                    </h3>
                   </div>
                   <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm text-charcoal-600">
                     {translatedItems.map((it, idx) => (
-                      <li key={`${lang}-${cat.slug}-${cat.title}-${idx}-${it}`} className="flex gap-1.5"><span className="text-smsorange-500">›</span>{it}</li>
+                      <li
+                        key={`${lang}-${cat.slug}-${cat.title}-${idx}-${it}`}
+                        className="flex gap-1.5"
+                      >
+                        <span className="text-smsorange-500">›</span>
+                        {it}
+                      </li>
                     ))}
                   </ul>
                 </Link>
@@ -61,7 +79,8 @@ export default function EquipmentShowcase() {
         </div>
         <div className="mt-10 flex justify-end">
           <Link to="/equipment" className="sms-btn-ghost">
-            {t("home.equipExplore")} <ArrowRight className="h-4 w-4 rtl-flip-x" />
+            {t("home.equipExplore")}{" "}
+            <ArrowRight className="h-4 w-4 rtl-flip-x" />
           </Link>
         </div>
       </div>

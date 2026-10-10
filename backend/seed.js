@@ -10,8 +10,8 @@ const Category = require('./models/Category');
 const Province = require('./models/Province');
 const connectDB = require('./config/db');
 
-// Override the defaults with SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD / SEED_ADMIN_NAME.
-// Pass --reset-password to update the password of an existing admin.
+// Set SEED_ADMIN_PASSWORD before running. Email and name may also be configured.
+// Pass --reset-password to update an existing administrator's password.
 const adminCredentials = require('./config/adminCredentials');
 const adminEmail = (process.env.SEED_ADMIN_EMAIL || adminCredentials.email).trim().toLowerCase();
 const adminPassword = process.env.SEED_ADMIN_PASSWORD || adminCredentials.password;
@@ -20,6 +20,11 @@ const resetPassword = process.argv.includes('--reset-password');
 
 const seedData = async () => {
   try {
+    if (typeof adminPassword !== 'string' || adminPassword.length < 12) {
+      throw new Error(
+        'Set SEED_ADMIN_PASSWORD to a password of at least 12 characters before seeding.',
+      );
+    }
     connectDB();
     console.log('Connected to SQLite for seeding...');
 
@@ -32,13 +37,28 @@ const seedData = async () => {
         email: adminEmail,
         password: hashedPassword,
         role: 'admin',
+        is_active: true,
+        is_super_admin: true,
       });
-      console.log(`Default admin user created: ${adminEmail} / ${adminPassword}`);
+      console.log(`Default admin user created: ${adminEmail}`);
     } else if (resetPassword) {
       const hashedPassword = await bcrypt.hash(adminPassword, 12);
-      await User.findByIdAndUpdate(adminExists._id, { password: hashedPassword, role: 'admin' });
-      console.log(`Admin password reset: ${adminEmail} / ${adminPassword}`);
+      await User.findByIdAndUpdate(adminExists._id, {
+        password: hashedPassword,
+        role: 'admin',
+        is_active: true,
+        is_super_admin: true,
+        tokenVersion: String(Number(adminExists.tokenVersion || 0) + 1),
+      });
+      console.log(`Admin password reset: ${adminEmail}`);
     } else {
+      if (!adminExists.is_super_admin || adminExists.role !== 'admin') {
+        await User.findByIdAndUpdate(adminExists._id, {
+          role: 'admin',
+          is_active: true,
+          is_super_admin: true,
+        });
+      }
       console.log(`Admin user already exists: ${adminEmail} (use --reset-password to change it)`);
     }
 

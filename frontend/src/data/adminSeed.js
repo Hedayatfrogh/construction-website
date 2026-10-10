@@ -22,12 +22,12 @@ export const EMPTY_PROJECT = () => ({
   category: "Buildings",
   location: "",
   client: "",
-  status: "Completed",          // Planned | In Progress | Completed | On Hold
+  status: "Completed", // Planned | In Progress | Completed | On Hold
   year: new Date().getFullYear(),
   coverImage: "",
-  gallery: [],                  // array of image URLs
+  gallery: [], // array of image URLs
   featured: false,
-  body: "",                     // markdown / rich text
+  body: "", // markdown / rich text
   isPublished: false,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -37,7 +37,7 @@ export const EMPTY_TEAM_MEMBER = () => ({
   id: "",
   name: "",
   role: "",
-  department: "Technical",     // Executive | Operations | Projects | Technical | Quality | Finance | HSE | "Supply Chain" | "Human Resources"
+  department: "Technical", // Executive | Operations | Projects | Technical | Quality | Finance | HSE | "Supply Chain" | "Human Resources"
   bio: "",
   photo: "",
   email: "",
@@ -52,7 +52,7 @@ export const EMPTY_CLIENT = () => ({
   logo: "",
   website: "",
   description: "",
-  category: "Public",           // Public | Private | NGO | International
+  category: "Public", // Public | Private | NGO | International
   displayOrder: 0,
   isPublished: true,
 });
@@ -64,8 +64,8 @@ export const EMPTY_NEWS_ARTICLE = () => ({
   excerpt: "",
   body: "",
   coverImage: "",
-  category: "Company News",     // Company News | Project Update | Engineering Insights | Awards
-  tags: [],                     // array of strings
+  category: "Company News", // Company News | Project Update | Engineering Insights | Awards
+  tags: [], // array of strings
   isPublished: false,
   publishedAt: new Date().toISOString(),
   author: "SMS Team",
@@ -78,9 +78,9 @@ export const EMPTY_JOB = () => ({
   title: "",
   department: "Technical",
   location: "Kabul, Afghanistan",
-  type: "Full-time",            // Full-time | Part-time | Contract | Internship
+  type: "Full-time", // Full-time | Part-time | Contract | Internship
   description: "",
-  requirements: [],             // array of strings
+  requirements: [], // array of strings
   isOpen: true,
   postedAt: new Date().toISOString(),
 });
@@ -88,14 +88,46 @@ export const EMPTY_JOB = () => ({
 export const DEFAULT_SETTINGS = () => ({
   contactEmail: "",
   contactPhone: "+93 747777788",
-  addressLines: ["Flat #6, Kabul, Afghanistan", "Transport Street, Nangarhar, Afghanistan"],
+  addressLines: [
+    "Flat #6, Kabul, Afghanistan",
+    "Transport Street, Nangarhar, Afghanistan",
+  ],
   social: { facebook: "", twitter: "", linkedin: "", instagram: "" },
+  footerDescription: "",
+  footerCopyright: "",
 });
 
 // Order options reused by multiple forms.
-export const PROJECT_STATUSES   = ["Planned", "In Progress", "Completed", "On Hold"];
-export const PROJECT_CATEGORIES = ["Buildings", "Infrastructure", "Water & Irrigation", "Energy", "Rehabilitation", "Other"];
-export const TEAM_DEPARTMENTS   = ["Executive", "Operations", "Projects", "Technical", "Quality", "Finance", "HSE", "Supply Chain", "Human Resources"];
-export const CLIENT_CATEGORIES  = ["Public", "Private", "NGO", "International"];
-export const NEWS_CATEGORIES    = ["Company News", "Project Update", "Engineering Insights", "Awards"];
-export const JOB_TYPES          = ["Full-time", "Part-time", "Contract", "Internship"];
+export const PROJECT_STATUSES = [
+  "Planned",
+  "In Progress",
+  "Completed",
+  "On Hold",
+];
+export const PROJECT_CATEGORIES = [
+  "Buildings",
+  "Infrastructure",
+  "Water & Irrigation",
+  "Energy",
+  "Rehabilitation",
+  "Other",
+];
+export const TEAM_DEPARTMENTS = [
+  "Executive",
+  "Operations",
+  "Projects",
+  "Technical",
+  "Quality",
+  "Finance",
+  "HSE",
+  "Supply Chain",
+  "Human Resources",
+];
+export const CLIENT_CATEGORIES = ["Public", "Private", "NGO", "International"];
+export const NEWS_CATEGORIES = [
+  "Company News",
+  "Project Update",
+  "Engineering Insights",
+  "Awards",
+];
+export const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"];
