@@ -1,6 +1,6 @@
 // admin/pages/Clients.jsx
 import CrudManager from "./CrudManager";
-import { Field, TextInput, TextArea, Select, Checkbox, Badge } from "../adminUI";
+import { Field, TextInput, ImageInput, TextArea, Select, Checkbox, Badge } from "../adminUI";
 import { EMPTY_CLIENT, CLIENT_CATEGORIES } from "../../data/adminSeed";
 import { Building2 } from "lucide-react";
 
@@ -37,7 +37,7 @@ function ClientForm({ item, setItem }) {
           <TextInput type="number" value={item.displayOrder} onChange={(e) => setItem({ ...item, displayOrder: Number(e.target.value) || 0 })} />
         </Field>
         <Field label="Logo URL" hint="Square PNG with transparent background looks best">
-          <TextInput value={item.logo} onChange={(e) => setItem({ ...item, logo: e.target.value })} placeholder="https://..." />
+          <ImageInput value={item.logo} onChange={(url) => setItem({ ...item, logo: url })} />
         </Field>
       </div>
       <Field label="Description">

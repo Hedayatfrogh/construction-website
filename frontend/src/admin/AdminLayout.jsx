@@ -35,6 +35,7 @@ import {
   ClipboardList,
   CalendarDays,
   Contact,
+  Newspaper,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -145,6 +146,7 @@ const NAV_GROUPS = [
       { to: "/admin/team", icon: Users, key: "team" },
       { to: "/admin/upcoming", icon: CalendarDays, key: "upcoming" },
       { to: "/admin/clients", icon: Building2, key: "clients" },
+      { to: "/admin/news", icon: Newspaper, key: "news" },
       { to: "/admin/jobs", icon: Briefcase, key: "jobs" },
       { to: "/admin/contact", icon: Contact, key: "contact" },
     ],

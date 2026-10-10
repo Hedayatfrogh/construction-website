@@ -54,7 +54,7 @@ const en = {
     safetyQuality: "Safety & Quality",
     sustainability: "Sustainability",
     methodology: "Methodology",
-    clients: "Clients",
+    clients: "Customers",
     news: "News",
     contact: "Contact",
   },

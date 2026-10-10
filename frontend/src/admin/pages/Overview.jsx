@@ -12,6 +12,8 @@ import {
 import { PageHeader, Card } from "../adminUI";
 import { useContentSection } from "../../data/contentStore";
 import { useAuth } from "../../context/AuthContext";
+import { services as defaultServices } from "../../data/content";
+import { equipmentCategories as defaultEquipment } from "../../data/operations";
 
 function StatCard({ icon: Icon, label, count, to, tone = "brand" }) {
   const tones = {
@@ -45,6 +47,8 @@ export default function Overview() {
   const clients  = useContentSection("clients", []);
   const news     = useContentSection("newsArticles", []);
   const jobs     = useContentSection("jobs", []);
+  const services = useContentSection("services", defaultServices);
+  const equipment = useContentSection("equipmentCategories", defaultEquipment);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,8 +79,8 @@ export default function Overview() {
         <StatCard icon={Building2}      label="Clients"           count={clients.filter((m) => m.isPublished !== false).length} to="/admin/clients" tone="success" />
         <StatCard icon={Newspaper}      label="News articles"      count={news.filter((m) => m.isPublished).length} to="/admin/news" tone="brand" />
         <StatCard icon={Briefcase}      label="Open jobs"          count={jobs.filter((m) => m.isOpen).length} to="/admin/jobs" tone="success" />
-        <StatCard icon={Wrench}         label="Equipment"          count="6"   to="/admin/equipment" tone="navy" />
-        <StatCard icon={Globe}          label="Homepage"           count="Edit" to="/admin/homepage" tone="warning" />
+        <StatCard icon={Wrench}         label="Equipment"          count={equipment.length} to="/admin/equipment" tone="navy" />
+        <StatCard icon={Globe}          label="Services"           count={services.length} to="/admin/services" tone="warning" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">

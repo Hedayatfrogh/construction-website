@@ -1,6 +1,6 @@
 // admin/pages/Projects.jsx
 import CrudManager from "./CrudManager";
-import { Field, TextInput, TextArea, Select, Checkbox, TagInput, Badge, PublishToggle, StarToggle } from "../adminUI";
+import { Field, TextInput, ImageInput, TextArea, Select, Checkbox, TagInput, Badge, PublishToggle, StarToggle } from "../adminUI";
 import { EMPTY_PROJECT, PROJECT_STATUSES, PROJECT_CATEGORIES } from "../../data/adminSeed";
 import { FolderKanban } from "lucide-react";
 
@@ -57,7 +57,7 @@ function ProjectForm({ item, setItem }) {
           <TextInput value={item.client} onChange={(e) => setItem({ ...item, client: e.target.value })} placeholder="Government of Afghanistan" />
         </Field>
         <Field label="Cover image URL">
-          <TextInput value={item.coverImage} onChange={(e) => setItem({ ...item, coverImage: e.target.value })} placeholder="https://..." />
+          <ImageInput value={item.coverImage} onChange={(url) => setItem({ ...item, coverImage: url })} />
         </Field>
       </div>
       <Field label="Summary" hint="Shown in project cards">

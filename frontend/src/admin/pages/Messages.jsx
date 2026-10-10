@@ -53,9 +53,26 @@ export default function Messages() {
   };
 
   const remove = async (id) => {
-    setContacts((list) => list.filter((x) => x.id !== id));
-    setConfirmDelete(null);
-    if (selected?.id === id) setSelected(null);
+    try {
+      await api.delete(`/messages/${id}`);
+      setContacts((list) => list.filter((x) => x.id !== id));
+      setConfirmDelete(null);
+      if (selected?.id === id) setSelected(null);
+    } catch (e) {
+      setConfirmDelete(null);
+      setError(e.response?.data?.message || "Could not delete this message.");
+    }
+  };
+
+  const toggleRead = async (c) => {
+    const isRead = !c.isRead;
+    try {
+      await api.patch(`/messages/${c.id}`, { isRead });
+      setContacts((list) => list.map((x) => (x.id === c.id ? { ...x, isRead } : x)));
+      setSelected((s) => (s && s.id === c.id ? { ...s, isRead } : s));
+    } catch (e) {
+      window.alert(e.response?.data?.message || "Could not update this message.");
+    }
   };
 
   const filtered = contacts.filter((c) => {
@@ -119,8 +136,11 @@ export default function Messages() {
           footer={
             <>
               <button onClick={() => setConfirmDelete(selected.id)} className="px-3 py-1.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm font-semibold inline-flex items-center gap-1">
-                <Trash2 className="h-4 w-4" /> Remove from list
+                <Trash2 className="h-4 w-4" /> Delete
               </button>
+              <SecondaryButton onClick={() => toggleRead(selected)}>
+                {selected.isRead ? "Mark as unread" : "Mark as read"}
+              </SecondaryButton>
               <SecondaryButton onClick={() => setSelected(null)}>Close</SecondaryButton>
             </>
           }
@@ -153,16 +173,16 @@ export default function Messages() {
       )}
 
       {confirmDelete && (
-        <Modal open onClose={() => setConfirmDelete(null)} title="Remove from list?" size="sm"
+        <Modal open onClose={() => setConfirmDelete(null)} title="Delete this message?" size="sm"
           footer={
             <>
               <button onClick={() => setConfirmDelete(null)} className="px-3 py-1.5 rounded-md border border-charcoal-200 text-charcoal-700 text-sm">Cancel</button>
-              <button onClick={() => remove(confirmDelete)} className="px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Remove</button>
+              <button onClick={() => remove(confirmDelete)} className="px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Delete</button>
             </>
           }
         >
           <p className="text-sm text-charcoal-700">
-            This will remove the message from your inbox. (The backend doesn't support permanent deletion yet; the row is hidden in the admin UI.)
+            This permanently deletes the message. This action cannot be undone.
           </p>
         </Modal>
       )}

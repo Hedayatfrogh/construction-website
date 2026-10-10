@@ -7,7 +7,7 @@
 //     text invisible whenever the hero image / overlay had not loaded,
 //     producing the 'header disappears after scrolling back to top' bug.
 //   - Desktop (xl+): ONE clean horizontal row -- Logo+name, all 12 nav
-//     links, phone (3xl+), 'Request a Consultation' (2xl+), 'Log In'. Uses
+//     links, phone (3xl+), 'Request a Consultation' (2xl+), Dashboard. Uses
 //     flexbox + gap spacing. No absolute positioning. No negative
 //     margins. whitespace-nowrap on every text node so links never wrap.
 //   - Tablet + Mobile (< xl): hamburger button. Full link list lives in
