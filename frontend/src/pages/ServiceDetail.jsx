@@ -1,5 +1,5 @@
-import { Link, useParams, Navigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Link, useParams, Navigate, useLocation } from "react-router-dom";
+import { ArrowLeft, ArrowRight, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import { services } from "../data/content";
 import PageHero from "../components/ui/PageHero";
 import Reveal from "../components/ui/Reveal";
@@ -11,6 +11,7 @@ export default function ServiceDetail() {
   const { slug } = useParams();
   const service = services.find((s) => s.slug === slug);
   const { t } = useLanguage();
+  const location = useLocation();
   if (!service) return <Navigate to="/services" replace />;
 
   const title = t(`services.${service.slug}.title`);
@@ -24,6 +25,25 @@ export default function ServiceDetail() {
       <section className="sms-section bg-white">
         <div className="sms-container grid gap-12 xl:grid-cols-[1.5fr_1fr]">
           <Reveal>
+            <Link to={location.state?.from || "/services"} className="sms-btn-ghost mb-6">
+              <ArrowLeft className="h-4 w-4 rtl-flip-x" /> {t("serviceDetail.backToServices")}
+            </Link>
+            <div className="mb-10 aspect-video overflow-hidden rounded-2xl bg-charcoal-50 border border-charcoal-100 shadow-sms-soft">
+              {service.media?.type === "video" ? (
+                <video src={service.media.src} poster={service.media.poster} controls playsInline preload="none" className="h-full w-full object-cover" />
+              ) : service.media?.src ? (
+                <img src={service.media.src} alt={title} loading="lazy" className="h-full w-full object-cover" />
+              ) : (
+                <div className="h-full w-full grid place-items-center text-center p-6">
+                  <div>
+                    <span className="mx-auto h-14 w-14 rounded-full bg-smsorange-50 text-smsorange-600 grid place-items-center">
+                      <ImageIcon className="h-7 w-7" />
+                    </span>
+                    <p className="mt-3 text-sm text-charcoal-500">{t("serviceDetail.mediaPlaceholder")}</p>
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="inline-flex items-center gap-3">
               <span className="h-12 w-12 rounded-md bg-smsorange-50 text-smsorange-600 grid place-items-center">
                 <IconByName name={service.icon} className="h-6 w-6" />

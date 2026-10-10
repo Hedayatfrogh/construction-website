@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Lightweight image/video carousel.
-// items: [{ type: "image", src, alt } | { type: "video", src, poster, alt }]
+// Lightweight image/video/text carousel.
+// items: [{ type: "image", src, alt } | { type: "video", src, poster, alt }
+//         | { type: "text", title, eyebrow?, text?, points?, src? }]
 export default function MediaSlider({
   items = [],
   interval = 10000,
   prevLabel = "Previous slide",
   nextLabel = "Next slide",
+  showCountdown = false,
+  frameClass = "aspect-[4/3] sm:aspect-video",
+  contentDir,
 }) {
   const seconds = Math.max(1, Math.round(interval / 1000));
   const [index, setIndex] = useState(0);
@@ -39,6 +43,15 @@ export default function MediaSlider({
   const paused = hovered || videoPlaying;
   const advance = () => setIndex((i) => (i + 1) % count);
 
+  // Numeric countdown shown beside the dots; display only, the animation drives advancing.
+  const [remaining, setRemaining] = useState(seconds);
+  useEffect(() => { setRemaining(seconds); }, [index, cycle, seconds]);
+  useEffect(() => {
+    if (!showCountdown || paused || count < 2) return;
+    const id = setInterval(() => setRemaining((r) => Math.max(1, r - 1)), 1000);
+    return () => clearInterval(id);
+  }, [showCountdown, paused, count, index, cycle]);
+
   if (!count) return null;
 
   const onTouchEnd = (e) => {
@@ -53,12 +66,12 @@ export default function MediaSlider({
       className="mx-auto w-full max-w-[96rem]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
+      onFocus={(e) => { if (e.target.matches?.(":focus-visible")) setHovered(true); }}
       onBlur={() => setHovered(false)}
     >
       <div
         dir="ltr"
-        className="relative overflow-hidden rounded-2xl shadow-sms-soft bg-charcoal-900 aspect-[4/3] sm:aspect-video"
+        className={`relative overflow-hidden rounded-2xl shadow-sms-soft bg-charcoal-900 ${frameClass}`}
         onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={onTouchEnd}
       >
@@ -67,8 +80,26 @@ export default function MediaSlider({
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
           {items.map((item, i) => (
-            <div key={item.src} className="h-full w-full shrink-0" aria-hidden={i !== index}>
-              {item.type === "video" ? (
+            <div key={item.src || item.title || i} className="relative h-full w-full shrink-0" aria-hidden={i !== index}>
+              {item.type === "text" ? (
+                <div className={`grid h-full w-full bg-white ${item.src ? "sm:grid-cols-[2fr_3fr]" : ""}`}>
+                  {item.src && (
+                    <img src={item.src} alt={item.title || ""} loading={i === 0 ? "eager" : "lazy"} decoding="async" className="hidden sm:block h-full w-full object-cover" />
+                  )}
+                  <div dir={contentDir} className="flex flex-col justify-center px-14 py-8 sm:px-16">
+                    {item.eyebrow && <div className="sms-eyebrow">{item.eyebrow}</div>}
+                    <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold leading-tight text-charcoal-900">{item.title}</h3>
+                    {item.text && <p className="mt-3 max-w-3xl text-sm sm:text-base text-charcoal-600 leading-relaxed">{item.text}</p>}
+                    {item.points?.length > 0 && (
+                      <ul className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-2 max-w-3xl text-sm text-charcoal-700">
+                        {item.points.map((p) => (
+                          <li key={p} className="flex gap-2"><span className="text-smsorange-500">›</span>{p}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              ) : item.type === "video" ? (
                 <video
                   ref={(el) => { videoRefs.current[i] = el; }}
                   src={item.src}
@@ -117,10 +148,10 @@ export default function MediaSlider({
       </div>
 
       {count > 1 && (
-        <div dir="ltr" className="mt-5 flex justify-center gap-2">
+        <div dir="ltr" className="mt-5 flex flex-wrap items-center justify-center gap-2">
           {items.map((item, i) => (
             <button
-              key={item.src}
+              key={item.src || item.title || i}
               type="button"
               aria-label={`${i + 1} / ${count}`}
               aria-current={i === index ? "true" : undefined}
@@ -142,7 +173,15 @@ export default function MediaSlider({
               )}
             </button>
           ))}
+          {showCountdown && (
+            <span aria-live="off" className="ml-2 min-w-[2.5rem] rounded-full bg-smsorange-50 px-2 py-0.5 text-center text-xs font-semibold tabular-nums text-smsorange-600">
+              {remaining}s
+            </span>
+          )}
         </div>
+      )}
+      {items[index]?.caption && (
+        <p className="mt-3 text-center font-display text-base font-semibold text-charcoal-800">{items[index].caption}</p>
       )}
     </div>
   );

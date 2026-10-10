@@ -78,7 +78,7 @@ export function LanguageProvider({ children }) {
   // `t` is memoised so consumers can put it in dependency arrays safely.
   const value = useMemo(() => {
     const dir = isRtl(lang) ? "rtl" : "ltr";
-    const t = (key) => translate(lang, key);
+    const t = (key, ...args) => translate(lang, key, ...args);
     return { lang, dir, setLang, toggleLang, t };
   }, [lang, setLang, toggleLang]);
 
