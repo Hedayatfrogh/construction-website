@@ -33,6 +33,8 @@ import { navLinks } from '../data/operations';
 import { company } from '../data/company';
 import ThemeToggle from './ThemeToggle';
 import LanguageSwitcher from './LanguageSwitcher';
+import PhoneNumber from './ui/PhoneNumber';
+import { telHref } from '../utils/phoneDisplay';
 
 function Logo() {
   const { t } = useLanguage();
@@ -157,11 +159,11 @@ export default function Navbar() {
         {/* Full right-side controls (2xl+). Phone, primary CTA, Log In. */}
         <div className="hidden 2xl:flex items-center gap-3 shrink-0">
           <a
-            href={"tel:" + company.phone.replace(/\\s+/g, "")}
+            href={telHref(company.phone)}
             className="hidden 3xl:inline-flex items-center gap-2 text-sm font-semibold text-charcoal-700 hover:text-smsorange-500 whitespace-nowrap"
           >
             <Phone className="h-4 w-4" />
-            <span>{company.phone}</span>
+            <PhoneNumber value={company.phone} />
           </a>
           <NavLinkSmart
             to="/contact"
@@ -252,11 +254,11 @@ export default function Navbar() {
                   {user?.role === "admin" ? t('header.dashboard') : t('logIn')}
                 </NavLinkSmart>
                 <a
-                  href={"tel:" + company.phone.replace(/\\s+/g, "")}
+                  href={telHref(company.phone)}
                   className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-charcoal-700 py-2"
                 >
                   <Phone className="h-4 w-4" />
-                  {company.phone}
+                  <PhoneNumber value={company.phone} />
                 </a>
               </div>
             </div>

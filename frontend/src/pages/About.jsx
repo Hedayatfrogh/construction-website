@@ -6,6 +6,8 @@ import { company, vision, mission } from "../data/company";
 import { values } from "../data/content";
 import { useLanguage } from "../context/LanguageContext";
 import { useContentSection } from "../data/contentStore";
+import PhoneNumber from "../components/ui/PhoneNumber";
+import companyLicense from "../assets/company-license.jpg";
 
 // Maps the English infoRow labels in the original code to translation
 // keys. Centralised so the labels stay in sync with `companyFacts`.
@@ -60,7 +62,7 @@ export default function About() {
       label: "UNGM Number",
       value: companyContent.ungmNumber || t("about.editableInAdmin"),
     },
-    { label: "Phone", value: companyContent.phone },
+    { label: "Phone", value: <PhoneNumber value={companyContent.phone} /> },
     {
       label: "Email",
       value: companyContent.email || t("about.editableInAdmin"),
@@ -158,6 +160,31 @@ export default function About() {
       </section>
 
       <section className="sms-section bg-white">
+        <div className="sms-container">
+          <SectionHeader
+            align="center"
+            eyebrow={t("about.licenseEyebrow")}
+            title={t("about.licenseTitle")}
+            subtitle={t("about.licenseSubtitle")}
+          />
+          <Reveal>
+            <a
+              href={companyLicense}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-10 mx-auto block max-w-4xl overflow-hidden rounded-2xl border border-charcoal-100 bg-white shadow-sms-soft"
+            >
+              <img
+                src={companyLicense}
+                alt={t("about.licenseAlt")}
+                className="w-full h-auto"
+              />
+            </a>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="sms-section bg-charcoal-50">
         <div className="sms-container">
           <SectionHeader
             align="center"

@@ -3,11 +3,13 @@ import { company } from "../../data/company";
 import SectionHeader from "../ui/SectionHeader";
 import Reveal from "../ui/Reveal";
 import { useLanguage } from "../../context/LanguageContext";
+import PhoneNumber from "../ui/PhoneNumber";
+import { telHref } from "../../utils/phoneDisplay";
 
 export default function ContactStrip() {
   const { t } = useLanguage();
   const items = [
-    { icon: Phone,  label: t("home.contactCallUs"),            value: company.phone,                                       href: `tel:${company.phone.replace(/\s+/g, "")}` },
+    { icon: Phone,  label: t("home.contactCallUs"),            value: company.phone,                                       href: telHref(company.phone) },
     { icon: Mail,   label: t("home.contactEmail"),             value: company.email || t("home.contactEmailPlaceholder"), href: company.email ? `mailto:${company.email}` : null },
     { icon: MapPin, label: t("home.contactKabulOffice"),       value: company.offices.main,                                href: null },
     { icon: MapPin, label: t("home.contactNangarharOffice"),   value: company.offices.branch,                               href: null },
@@ -26,7 +28,9 @@ export default function ContactStrip() {
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.2em] text-charcoal-500 font-semibold">{it.label}</div>
-                    <div className="mt-1 text-sm font-semibold text-charcoal-900">{it.value}</div>
+                    <div className="mt-1 text-sm font-semibold text-charcoal-900">
+                      {it.href?.startsWith("tel:") ? <PhoneNumber value={it.value} /> : it.value}
+                    </div>
                   </div>
                 </div>
               );

@@ -268,6 +268,11 @@ const en = {
     valuesEyebrow: "Our Values",
     valuesTitle: "The principles that guide every project",
     valuesSubtitle: "Seven values shape our culture and our work.",
+    licenseEyebrow: "Official Documents",
+    licenseTitle: "Company License",
+    licenseSubtitle:
+      "The official business license issued by the Ministry of Industry and Commerce of Afghanistan.",
+    licenseAlt: "SMS business license issued by the Ministry of Industry and Commerce",
     ctaTitle: "Want to know more about SMS?",
     ctaSubtitle:
       "Talk to our team about your construction or engineering project.",
@@ -2423,6 +2428,11 @@ const fa = {
     valuesEyebrow: "ارزش‌های ما",
     valuesTitle: "اصولی که هر پروژه را راهنمایی می‌کنند",
     valuesSubtitle: "هفت ارزش فرهنگ و کار ما را شکل می‌دهند.",
+    licenseEyebrow: "اسناد رسمی",
+    licenseTitle: "جواز شرکت",
+    licenseSubtitle:
+      "جواز رسمی تجارت صادر شده توسط وزارت صنعت و تجارت افغانستان.",
+    licenseAlt: "جواز تجارت SMS صادر شده توسط وزارت صنعت و تجارت",
     ctaTitle: "می‌خواهید درباره SMS بیشتر بدانید؟",
     ctaSubtitle: "با تیم ما درباره پروژه ساخت و ساز یا انجینری خود صحبت کنید.",
   },
@@ -3249,7 +3259,7 @@ const fa = {
     email: "ایمیل",
     emailPlaceholder: "you@example.com",
     phone: "تلفن",
-    phonePlaceholder: "+93 ...",
+    phonePlaceholder: "+۹۳ ...",
     company: "شرکت / سازمان",
     companyPlaceholder: "اختیاری",
     subject: "موضوع",

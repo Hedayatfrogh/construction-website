@@ -13,6 +13,8 @@ import { company } from "../data/company";
 import { services } from "../data/content";
 import { useLanguage } from "../context/LanguageContext";
 import { useContentSection } from "../data/contentStore";
+import PhoneNumber from "./ui/PhoneNumber";
+import { formatPhoneDisplay, telHref } from "../utils/phoneDisplay";
 import "./Footer.css";
 
 const year = new Date().getFullYear();
@@ -171,12 +173,14 @@ export default function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-white/80">
               <li>
                 <a
-                  href={`tel:${phone.replace(/\s+/g, "")}`}
+                  href={telHref(phone)}
                   className="footer-link footer-link--with-icon"
-                  aria-label={t("footerCallPhone", phone)}
+                  aria-label={t("footerCallPhone", formatPhoneDisplay(phone, lang))}
                 >
                   <Phone className="footer-link__icon h-4 w-4 text-smsorange-500 shrink-0" />
-                  <span className="break-all">{phone}</span>
+                  <span className="break-all">
+                    <PhoneNumber value={phone} />
+                  </span>
                 </a>
               </li>
               {email && (

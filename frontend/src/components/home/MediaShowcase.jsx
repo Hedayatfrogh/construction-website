@@ -17,7 +17,7 @@ const MEDIA = [
 export default function MediaShowcase() {
   const { t } = useLanguage();
   return (
-    <section className="sms-section bg-charcoal-50 border-y border-charcoal-100">
+    <section className="sms-section bg-white border-y border-charcoal-100">
       <div className="sms-container">
         <div className="mb-10">
           <SectionHeader
@@ -29,7 +29,7 @@ export default function MediaShowcase() {
         </div>
       </div>
       <div className="px-4 sm:px-6 lg:px-8">
-        <MediaSlider items={MEDIA} interval={10000} prevLabel={t("home.mediaPrev")} nextLabel={t("home.mediaNext")} />
+        <MediaSlider surface="light" items={MEDIA} interval={10000} prevLabel={t("home.mediaPrev")} nextLabel={t("home.mediaNext")} />
       </div>
     </section>
   );
