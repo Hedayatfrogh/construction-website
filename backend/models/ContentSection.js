@@ -1,14 +1,12 @@
-const defineModel = require('../utils/sqliteModel');
+const mongoose = require('../utils/mongoose');
 
-// One row per admin-panel content section (projects, teamMembers, settings, ...).
-const ContentSection = defineModel('ContentSection', 'content_sections', {
-  name: {
-    type: 'string',
-    required: 'Section name is required',
-    unique: true,
-    trim: true,
+// One document per non-list admin section (company, about, settings, ...).
+const contentSectionSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: [true, 'Section name is required'], unique: true, trim: true },
+    value: { type: mongoose.Schema.Types.Mixed },
   },
-  value: { type: 'json' },
-});
+  { timestamps: true, minimize: false, collection: 'siteSettings' },
+);
 
-module.exports = ContentSection;
+module.exports = mongoose.model('ContentSection', contentSectionSchema);

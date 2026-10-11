@@ -1,16 +1,14 @@
-const defineModel = require('../utils/sqliteModel');
+const mongoose = require('../utils/mongoose');
 
-const Province = defineModel('Province', 'provinces', {
-  name: {
-    type: 'string',
-    required: 'Province name is required',
-    unique: true,
-    trim: true,
+const provinceSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: [true, 'Province name is required'], unique: true, trim: true },
+    code: { type: String, trim: true, uppercase: true },
+    description: { type: String, trim: true },
+    image: { type: String, trim: true },
+    isPublished: { type: Boolean, default: true },
   },
-  code: { type: 'string', trim: true, uppercase: true },
-  description: { type: 'string', trim: true },
-  image: { type: 'string', trim: true },
-  isPublished: { type: 'boolean', default: true },
-});
+  { timestamps: true },
+);
 
-module.exports = Province;
+module.exports = mongoose.model('Province', provinceSchema);

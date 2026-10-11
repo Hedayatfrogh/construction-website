@@ -1,18 +1,17 @@
-const defineModel = require('../utils/sqliteModel');
+const mongoose = require('../utils/mongoose');
 
-const Advertisement = defineModel('Advertisement', 'advertisements', {
-  title: {
-    type: 'string',
-    required: 'Advertisement title is required',
-    trim: true,
+const advertisementSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: [true, 'Advertisement title is required'], trim: true },
+    description: { type: String, trim: true },
+    image: { type: String, trim: true },
+    link: { type: String, trim: true },
+    position: { type: String, default: 'sidebar', trim: true },
+    isPublished: { type: Boolean, default: true },
+    startDate: Date,
+    endDate: Date,
   },
-  description: { type: 'string', trim: true },
-  image: { type: 'string', trim: true },
-  link: { type: 'string', trim: true },
-  position: { type: 'string', default: 'sidebar', trim: true },
-  isPublished: { type: 'boolean', default: true },
-  startDate: { type: 'date' },
-  endDate: { type: 'date' },
-});
+  { timestamps: true },
+);
 
-module.exports = Advertisement;
+module.exports = mongoose.model('Advertisement', advertisementSchema);

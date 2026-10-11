@@ -6,18 +6,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const { createHash, randomBytes } = require('crypto');
-const { getDb } = require('../config/db');
-
-const ensurePasswordResetTable = () => {
-  getDb().exec(`
-    CREATE TABLE IF NOT EXISTS password_resets (
-      token_hash TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      expires_at TEXT NOT NULL,
-      used_at TEXT
-    )
-  `);
-};
+const PasswordReset = require('../models/PasswordReset');
 
 // Helper: is the request coming from a local / LAN context? (plain HTTP,
 // no TLS, so we must NOT use `Secure` cookies and should use `Lax` for
@@ -223,16 +212,14 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     return res.status(200).json({ status: 'success', message: genericMessage });
   }
 
-  ensurePasswordResetTable();
   const rawToken = randomBytes(32).toString('hex');
   const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-  const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-  getDb()
-    .prepare('DELETE FROM password_resets WHERE user_id = ?')
-    .run(user.id);
-  getDb()
-    .prepare('INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES (?, ?, ?)')
-    .run(tokenHash, user.id, expiresAt);
+  await PasswordReset.deleteMany({ userId: user._id });
+  await PasswordReset.create({
+    tokenHash,
+    userId: user._id,
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+  });
 
   try {
     const transport = nodemailer.createTransport({
@@ -253,7 +240,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       text: `Use this one-time link within 30 minutes to reset your password: ${resetUrl.toString()}`,
     });
   } catch (error) {
-    getDb().prepare('DELETE FROM password_resets WHERE token_hash = ?').run(tokenHash);
+    await PasswordReset.deleteOne({ tokenHash });
     console.error('Password reset email delivery failed:', error.code || 'mail error');
     return next(new AppError('Could not send password reset email. Please try again later.', 503));
   }
@@ -277,34 +264,21 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     );
   }
 
-  ensurePasswordResetTable();
   const tokenHash = createHash('sha256').update(token).digest('hex');
-  const db = getDb();
-  db.exec('BEGIN IMMEDIATE');
-  try {
-    const reset = db
-      .prepare(
-        `SELECT user_id FROM password_resets
-         WHERE token_hash = ? AND used_at IS NULL AND julianday(expires_at) > julianday('now')`,
-      )
-      .get(tokenHash);
-    const user = reset ? await User.findById(reset.user_id) : null;
-    if (!user || user.role !== 'admin') {
-      db.exec('ROLLBACK');
-      return next(new AppError('This password reset link is invalid or expired.', 400));
-    }
-
-    await User.findByIdAndUpdate(user.id, {
-      password: await bcrypt.hash(newPassword, 12),
-      tokenVersion: String(Number(user.tokenVersion || 0) + 1),
-    });
-    db.prepare('UPDATE password_resets SET used_at = ? WHERE token_hash = ?')
-      .run(new Date().toISOString(), tokenHash);
-    db.exec('COMMIT');
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
+  // Atomically claim the token so it can only be used once.
+  const reset = await PasswordReset.findOneAndUpdate(
+    { tokenHash, usedAt: null, expiresAt: { $gt: new Date() } },
+    { usedAt: new Date() },
+  );
+  const user = reset ? await User.findById(reset.userId) : null;
+  if (!user || user.role !== 'admin') {
+    return next(new AppError('This password reset link is invalid or expired.', 400));
   }
+
+  await User.findByIdAndUpdate(user.id, {
+    password: await bcrypt.hash(newPassword, 12),
+    tokenVersion: String(Number(user.tokenVersion || 0) + 1),
+  });
 
   return res.status(200).json({
     status: 'success',

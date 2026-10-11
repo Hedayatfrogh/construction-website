@@ -1,40 +1,23 @@
-const defineModel = require('../utils/sqliteModel');
+const mongoose = require('../utils/mongoose');
 
-const User = defineModel('User', 'users', {
-  name: {
-    type: 'string',
-    required: 'Please tell us your name!',
-    trim: true,
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: [true, 'Please tell us your name!'], trim: true, maxlength: 150 },
+    email: {
+      type: String,
+      required: [true, 'Please provide your email!'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email.'],
+    },
+    password: { type: String, required: [true, 'Please provide a password!'], select: false },
+    role: { type: String, enum: ['user', 'admin'], default: 'admin' },
+    tokenVersion: { type: String, default: '0' },
+    is_active: { type: Boolean, default: true },
+    is_super_admin: { type: Boolean, default: false },
   },
-  email: {
-    type: 'string',
-    required: 'Please provide your email!',
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  password: {
-    type: 'string',
-    required: 'Please provide a password!',
-    select: false,
-  },
-  role: {
-    type: 'string',
-    enum: ['user', 'admin'],
-    default: 'admin',
-  },
-  tokenVersion: {
-    type: 'string',
-    default: '0',
-  },
-  is_active: {
-    type: 'boolean',
-    default: true,
-  },
-  is_super_admin: {
-    type: 'boolean',
-    default: false,
-  },
-});
+  { timestamps: true, collection: 'admins' },
+);
 
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
