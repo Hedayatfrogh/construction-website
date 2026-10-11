@@ -13,6 +13,7 @@ import {
   PrimaryButton, SecondaryButton, Modal,
 } from "../adminUI";
 import { useAuth } from "../../context/AuthContext";
+import PhoneNumber from "../../components/ui/PhoneNumber";
 
 export default function Messages() {
   const { api } = useAuth();
@@ -154,7 +155,7 @@ export default function Messages() {
               <div className="text-sm text-charcoal-500">{selected.company || "—"}</div>
               <div className="mt-2 text-xs text-charcoal-500">
                 <a href={`mailto:${selected.email}`} className="text-smsorange-600 hover:underline">{selected.email}</a>
-                {selected.phone && <> · {selected.phone}</>}
+                {selected.phone && <> · <PhoneNumber value={selected.phone} /></>}
               </div>
               <div className="mt-1 text-xs text-charcoal-400">
                 Submitted on {format(new Date(selected.createdAt), "PPP 'at' p")}

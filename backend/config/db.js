@@ -1,36 +1,24 @@
-const fs = require('fs');
-const path = require('path');
-const { DatabaseSync } = require('node:sqlite');
+const mongoose = require('../utils/mongoose');
 
-let db = null;
-const models = [];
-
-const resolveDbPath = () =>
-  path.resolve(__dirname, '..', process.env.DB_PATH || 'data/database.sqlite');
-
-// Opens the SQLite file (creating it and its folder if missing).
-const getDb = () => {
-  if (db) return db;
-  const dbPath = resolveDbPath();
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode = WAL;');
-  return db;
-};
-
-const registerModel = (model) => {
-  models.push(model);
-};
-
-// Opens the database and creates/migrates every registered model's table.
-const connectDB = () => {
-  const conn = getDb();
-  models.forEach((model) => model.ensureTable());
-  console.log(`Connected to SQLite database (${resolveDbPath()})`);
-  return conn;
+// Connects to MongoDB Atlas using MONGODB_URI from the environment.
+const connectDB = async () => {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI is missing. Set it in backend/config.env or the host environment.');
+  }
+  mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err.message);
+  });
+  mongoose.connection.on('disconnected', () => {
+    console.warn('MongoDB disconnected.');
+  });
+  await mongoose.connect(uri, {
+    dbName: process.env.MONGODB_DB_NAME || undefined,
+    serverSelectionTimeoutMS: 10000,
+  });
+  await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
+  console.log(`Connected to MongoDB (${mongoose.connection.name})`);
+  return mongoose.connection;
 };
 
 module.exports = connectDB;
-module.exports.getDb = getDb;
-module.exports.registerModel = registerModel;
-module.exports.resolveDbPath = resolveDbPath;

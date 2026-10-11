@@ -9,9 +9,9 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, 'config.env') });
 
 console.log('Loaded environment variables in server.js:', {
-  DB_PATH: process.env.DB_PATH || 'data/database.sqlite (default)',
+  MONGODB_URI: process.env.MONGODB_URI ? '[CONFIGURED]' : '[MISSING]',
   JWT_SECRET: process.env.JWT_SECRET ? '[CONFIGURED]' : '[MISSING]',
-  PORT: process.env.PORT || 2000,
+  PORT: process.env.PORT || 2001,
   HOST: process.env.HOST || '0.0.0.0',
 });
 
@@ -26,17 +26,14 @@ const app = require('./app');
 const User = require('./models/User');
 const adminCredentials = require('./config/adminCredentials');
 
-// Open (or create) the local SQLite database and its tables
-connectDB();
-
-// Create the local admin once without resetting a password changed in the UI.
+// Create the initial admin once from ADMIN_EMAIL / ADMIN_PASSWORD without
+// resetting a password that was later changed in the admin panel.
 const ensureLocalAdmin = async () => {
-  if (process.env.NODE_ENV === 'production') return;
   const existing = await User.findOne({ email: adminCredentials.email });
   if (!existing) {
-    if (!adminCredentials.password) {
+    if (!adminCredentials.password || adminCredentials.password.length < 12) {
       console.warn(
-        'Local admin was not created. Set SEED_ADMIN_PASSWORD to configure one.',
+        'Initial admin was not created. Set ADMIN_EMAIL and ADMIN_PASSWORD (12+ characters).',
       );
       return;
     }
@@ -55,15 +52,16 @@ const ensureLocalAdmin = async () => {
       is_super_admin: true,
     });
   }
-  console.log(`Local admin account is ready: ${adminCredentials.email}`);
+  console.log(`Admin account is ready: ${adminCredentials.email}`);
 };
 
-const port = process.env.PORT || 2000;
+const port = process.env.PORT || 2001;
 // Bind explicitly to 0.0.0.0 so the server is reachable from other devices
 // on the same local network (LAN), not just from localhost.
 const host = process.env.HOST || '0.0.0.0';
 
 const startServer = async () => {
+  await connectDB();
   await ensureLocalAdmin();
   app.listen(port, host, () => {
     console.log(`App running on port ${port}...`);

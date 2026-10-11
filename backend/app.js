@@ -17,6 +17,8 @@ const companiesRouter = require('./Routers/companiesRouter');
 const advertisementsRouter = require('./Routers/advertisementsRouter');
 const contentRouter = require('./Routers/contentRouter');
 const adminRouter = require('./Routers/adminRouter');
+const collectionsRouter = require('./Routers/collectionsRouter');
+const mongoose = require('./utils/mongoose');
 
 const app = express();
 
@@ -34,6 +36,10 @@ const allowedOrigins = [
   "http://127.0.0.1:5174",
   "http://localhost:5175",
   "http://127.0.0.1:5175",
+  ...(process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
 ];
 
 const isPrivateLanOrigin = (origin) => {
@@ -130,8 +136,27 @@ app.use(
   }),
 );
 
+app.get('/api/v1/health', (req, res) => {
+  const dbReady = mongoose.connection.readyState === 1;
+  res.status(dbReady ? 200 : 503).json({ status: dbReady ? 'success' : 'error', database: dbReady ? 'connected' : 'unavailable' });
+});
+
+app.use('/api', (req, res, next) => {
+  if (mongoose.connection.readyState === 1) return next();
+  res.status(503).json({ status: 'error', message: 'The database is temporarily unavailable. Please try again shortly.' });
+});
+
 app.use('/api/v1/messages', MessageRouter);
+app.use('/api/v1/contact', MessageRouter);
 app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/auth', usersRouter);
+app.use('/api/v1/projects', collectionsRouter.projects);
+app.use('/api/v1/services', collectionsRouter.services);
+app.use('/api/v1/equipment', collectionsRouter.equipment);
+app.use('/api/v1/clients', collectionsRouter.clients);
+app.use('/api/v1/team', collectionsRouter.team);
+app.use('/api/v1/blog', collectionsRouter.blog);
+app.use('/api/v1/settings', collectionsRouter.settings);
 app.use('/api/v1/provinces', provincesRouter);
 app.use('/api/v1/categories', categoriesRouter);
 app.use('/api/v1/companies', companiesRouter);
@@ -139,14 +164,14 @@ app.use('/api/v1/advertisements', advertisementsRouter);
 app.use('/api/v1/content', contentRouter);
 app.use('/api/v1/admin', adminRouter);
 
-// Global error handler
-app.use(globalErrorHandler);
-
 app.use("*", (req, res) => {
   res.status(404).json({
     status: "Fail",
     message: `Can't find ${req.originalUrl}`,
   });
 });
+
+// Global error handler
+app.use(globalErrorHandler);
 
 module.exports = app;

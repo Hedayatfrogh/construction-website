@@ -19,12 +19,12 @@ export default defineConfig({
     // need to know the LAN IP at build time.
     proxy: {
       '/api': {
-        target: 'http://localhost:2000',
+        target: 'http://localhost:2001',
         changeOrigin: true,
         secure: false,
       },
       '/Uploads': {
-        target: 'http://localhost:2000',
+        target: 'http://localhost:2001',
         changeOrigin: true,
         secure: false,
       },

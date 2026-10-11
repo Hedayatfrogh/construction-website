@@ -58,11 +58,7 @@ exports.updateMessage = catchAsync(async (req, res, next) => {
     return next(new AppError('isRead must be a boolean', 400));
   }
 
-  const message = await Message.findByIdAndUpdate(
-    id,
-    { isRead },
-    { new: true, runValidators: true }
-  );
+  const message = await Message.findByIdAndUpdate(id, { isRead });
 
   if (!message) {
     return next(new AppError('No message found with that ID', 404));
@@ -72,4 +68,12 @@ exports.updateMessage = catchAsync(async (req, res, next) => {
     status: 'success',
     message: 'Message updated successfully',
   });
+});
+
+exports.deleteMessage = catchAsync(async (req, res, next) => {
+  const message = await Message.findByIdAndDelete(req.params.id);
+  if (!message) {
+    return next(new AppError('No message found with that ID', 404));
+  }
+  res.status(204).send();
 });

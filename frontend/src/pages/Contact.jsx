@@ -14,6 +14,8 @@ import { company } from "../data/company";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useContentSection } from "../data/contentStore";
+import PhoneNumber from "../components/ui/PhoneNumber";
+import { telHref, toPersianDigits, toWesternDigits } from "../utils/phoneDisplay";
 
 const initialForm = {
   fullName: "",
@@ -76,7 +78,13 @@ export default function Contact() {
         firstName,
         lastName: rest.join(" "),
         email: form.email.trim(),
-        phone: form.phone.trim(),
+        phone: (() => {
+          const raw = form.phone.trim();
+          if (lang === "fa" && raw && !raw.startsWith("+")) {
+            return `+93 ${raw.replace(/^93[\s-]*/, "")}`;
+          }
+          return raw;
+        })(),
         company: form.company.trim(),
         description: form.subject.trim() ? `${form.subject.trim()}\n\n${message}` : message,
         websiteId: "azad_noori",
@@ -142,10 +150,10 @@ export default function Contact() {
                       {t("contact.phoneLabel")}
                     </div>
                     <a
-                      href={`tel:${phone.replace(/\s+/g, "")}`}
+                      href={telHref(phone)}
                       className="mt-1 block sms-link"
                     >
-                      {phone}
+                      <PhoneNumber value={phone} />
                     </a>
                   </div>
                 </li>
@@ -234,13 +242,40 @@ export default function Contact() {
                   >
                     {t("contact.phone")}
                   </label>
-                  <input
-                    id="phone"
-                    value={form.phone}
-                    onChange={update("phone")}
-                    placeholder={t("contact.phonePlaceholder")}
-                    className={inputCls()}
-                  />
+                  {lang === "fa" ? (
+                    <div
+                      dir="ltr"
+                      className="mt-1 flex w-full overflow-hidden rounded-md border border-charcoal-200 shadow-sm focus-within:border-smsorange-400 focus-within:ring-2 focus-within:ring-smsorange-200"
+                    >
+                      <span
+                        dir="ltr"
+                        className="inline-flex shrink-0 items-center border-r border-charcoal-200 bg-charcoal-50 px-3 text-sm text-charcoal-700 select-none"
+                      >
+                        +۹۳
+                      </span>
+                      <input
+                        id="phone"
+                        dir="ltr"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={toPersianDigits(form.phone)}
+                        onChange={(e) => {
+                          const western = toWesternDigits(e.target.value).replace(/^\+?93[\s-]*/, "");
+                          setForm((f) => ({ ...f, phone: western }));
+                        }}
+                        placeholder={toPersianDigits("747777788")}
+                        className="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-left text-sm outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      id="phone"
+                      value={form.phone}
+                      onChange={update("phone")}
+                      placeholder={t("contact.phonePlaceholder")}
+                      className={inputCls()}
+                    />
+                  )}
                 </div>
                 <div>
                   <label

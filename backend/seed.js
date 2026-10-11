@@ -13,20 +13,20 @@ const connectDB = require('./config/db');
 // Set SEED_ADMIN_PASSWORD before running. Email and name may also be configured.
 // Pass --reset-password to update an existing administrator's password.
 const adminCredentials = require('./config/adminCredentials');
-const adminEmail = (process.env.SEED_ADMIN_EMAIL || adminCredentials.email).trim().toLowerCase();
-const adminPassword = process.env.SEED_ADMIN_PASSWORD || adminCredentials.password;
-const adminName = process.env.SEED_ADMIN_NAME || adminCredentials.name;
+const mongoose = require('./utils/mongoose');
+const adminEmail = adminCredentials.email;
+const adminPassword = adminCredentials.password;
+const adminName = adminCredentials.name;
 const resetPassword = process.argv.includes('--reset-password');
 
 const seedData = async () => {
   try {
     if (typeof adminPassword !== 'string' || adminPassword.length < 12) {
       throw new Error(
-        'Set SEED_ADMIN_PASSWORD to a password of at least 12 characters before seeding.',
+        'Set ADMIN_PASSWORD to a password of at least 12 characters before seeding.',
       );
     }
-    connectDB();
-    console.log('Connected to SQLite for seeding...');
+    await connectDB();
 
     // Check if admin user exists
     const adminExists = await User.findOne({ email: adminEmail });
@@ -87,9 +87,10 @@ const seedData = async () => {
     }
 
     console.log('Seeding completed successfully!');
+    await mongoose.disconnect();
     process.exit(0);
   } catch (err) {
-    console.error('Error seeding database:', err);
+    console.error('Error seeding database:', err.message);
     process.exit(1);
   }
 };

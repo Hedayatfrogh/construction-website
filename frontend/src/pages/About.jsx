@@ -6,6 +6,7 @@ import { company, vision, mission } from "../data/company";
 import { values } from "../data/content";
 import { useLanguage } from "../context/LanguageContext";
 import { useContentSection } from "../data/contentStore";
+import PhoneNumber from "../components/ui/PhoneNumber";
 import companyLicense from "../assets/company-license.jpg";
 
 // Maps the English infoRow labels in the original code to translation
@@ -61,7 +62,7 @@ export default function About() {
       label: "UNGM Number",
       value: companyContent.ungmNumber || t("about.editableInAdmin"),
     },
-    { label: "Phone", value: companyContent.phone },
+    { label: "Phone", value: <PhoneNumber value={companyContent.phone} /> },
     {
       label: "Email",
       value: companyContent.email || t("about.editableInAdmin"),

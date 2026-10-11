@@ -3259,7 +3259,7 @@ const fa = {
     email: "ایمیل",
     emailPlaceholder: "you@example.com",
     phone: "تلفن",
-    phonePlaceholder: "+93 ...",
+    phonePlaceholder: "+۹۳ ...",
     company: "شرکت / سازمان",
     companyPlaceholder: "اختیاری",
     subject: "موضوع",
