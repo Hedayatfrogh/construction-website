@@ -7,9 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUser = async () => {
+  const fetchUser = async (attempt = 0) => {
     const tokenAtStart = window.sessionStorage.getItem("sms.admin.token");
     let superseded = false;
+    let retrying = false;
     try {
       const res = await api.get("/users/me");
       if (window.sessionStorage.getItem("sms.admin.token") !== tokenAtStart) {
@@ -25,13 +26,21 @@ export const AuthProvider = ({ children }) => {
         clearAccessToken();
         setUser(null);
       }
-    } catch {
-      if (window.sessionStorage.getItem("sms.admin.token") === tokenAtStart) {
-        if (tokenAtStart) clearAccessToken();
-        setUser(null);
-      } else superseded = true;
+    } catch (error) {
+      if (window.sessionStorage.getItem("sms.admin.token") !== tokenAtStart) {
+        superseded = true;
+        return;
+      }
+      const status = error.response?.status;
+      if ((!status || status >= 500) && attempt < 2) {
+        retrying = true;
+        await new Promise((r) => setTimeout(r, 1000));
+        return fetchUser(attempt + 1);
+      }
+      if (tokenAtStart) clearAccessToken();
+      setUser(null);
     } finally {
-      if (!superseded) setIsLoading(false);
+      if (!superseded && !retrying) setIsLoading(false);
     }
   };
 

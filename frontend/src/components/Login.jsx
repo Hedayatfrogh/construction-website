@@ -12,9 +12,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("Admin@123456");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({
-    general: "Network error. Please check your connection.",
-  });
+  const [errors, setErrors] = useState({});
 
   const { login } = useAuth();
   const { t } = useLanguage();

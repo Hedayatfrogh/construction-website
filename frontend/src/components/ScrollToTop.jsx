@@ -24,13 +24,31 @@ import { useLocation } from "react-router-dom";
  *  - Renders nothing.
  */
 export default function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const html = document.documentElement;
     const prevScrollBehavior = html.style.scrollBehavior;
+
+    // Route change to an in-page anchor (e.g. "/#services"): land on it.
+    const target = hash && document.getElementById(hash.slice(1));
+    if (target) {
+      const jump = () => {
+        html.style.scrollBehavior = "auto";
+        target.scrollIntoView({ block: "start" });
+        html.style.scrollBehavior = prevScrollBehavior;
+      };
+      jump();
+      const raf = requestAnimationFrame(jump);
+      const timers = [300, 800].map((ms) => setTimeout(jump, ms));
+      return () => {
+        cancelAnimationFrame(raf);
+        timers.forEach(clearTimeout);
+        html.style.scrollBehavior = prevScrollBehavior;
+      };
+    }
 
     // Honour reduced-motion: jump instantly without any easing.
     const reduceMotion =
