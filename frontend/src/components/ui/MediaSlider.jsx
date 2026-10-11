@@ -12,7 +12,16 @@ export default function MediaSlider({
   showCountdown = false,
   frameClass = "aspect-[4/3] sm:aspect-video",
   contentDir,
+  /** "light" = dots/caption on pale section bg; "dark" = on navy sections */
+  surface = "light",
 }) {
+  const dotTrack = surface === "dark" ? "bg-white/25 hover:bg-white/40" : "bg-charcoal-300 hover:bg-charcoal-400";
+  const captionClass =
+    surface === "dark" ? "text-white/90" : "text-charcoal-800";
+  const countdownClass =
+    surface === "dark"
+      ? "bg-white/10 text-smsgold-400"
+      : "bg-smsorange-50 text-smsorange-600";
   const seconds = Math.max(1, Math.round(interval / 1000));
   const [index, setIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -156,9 +165,9 @@ export default function MediaSlider({
               aria-label={`${i + 1} / ${count}`}
               aria-current={i === index ? "true" : undefined}
               onClick={() => goTo(i, true)}
-              className={`relative h-2.5 overflow-hidden rounded-full bg-charcoal-300 transition-all ${
-                i === index ? "w-10" : "w-2.5 hover:bg-charcoal-400"
-              }`}
+              className={`relative h-2.5 overflow-hidden rounded-full transition-all ${
+                i === index ? "w-10" : `w-2.5 ${dotTrack}`
+              } ${i === index ? (surface === "dark" ? "bg-white/25" : "bg-charcoal-300") : ""}`}
             >
               {i === index && (
                 <span
@@ -174,14 +183,14 @@ export default function MediaSlider({
             </button>
           ))}
           {showCountdown && (
-            <span aria-live="off" className="ml-2 min-w-[2.5rem] rounded-full bg-smsorange-50 px-2 py-0.5 text-center text-xs font-semibold tabular-nums text-smsorange-600">
+            <span aria-live="off" className={`ml-2 min-w-[2.5rem] rounded-full px-2 py-0.5 text-center text-xs font-semibold tabular-nums ${countdownClass}`}>
               {remaining}s
             </span>
           )}
         </div>
       )}
       {items[index]?.caption && (
-        <p className="mt-3 text-center font-display text-base font-semibold text-charcoal-800">{items[index].caption}</p>
+        <p className={`mt-3 text-center font-display text-base font-semibold ${captionClass}`}>{items[index].caption}</p>
       )}
     </div>
   );
