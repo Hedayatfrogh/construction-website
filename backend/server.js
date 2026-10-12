@@ -1,12 +1,29 @@
 const dotenv = require('dotenv');
+const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const bcrypt = require('bcryptjs');
 const connectDB = require('./config/db');
 
-// Load environment variables (.env first, config.env fallback)
-dotenv.config({ path: path.resolve(__dirname, '.env') });
-dotenv.config({ path: path.resolve(__dirname, 'config.env') });
+// Host-provided variables take precedence; non-empty .env values precede config.env.
+const loadEnvFile = (filePath) => {
+  let parsed;
+  try {
+    parsed = dotenv.parse(fs.readFileSync(filePath));
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
+  }
+
+  for (const [key, value] of Object.entries(parsed)) {
+    if (!process.env[key]?.trim() && value.trim()) {
+      process.env[key] = value;
+    }
+  }
+};
+
+loadEnvFile(path.resolve(__dirname, '.env'));
+loadEnvFile(path.resolve(__dirname, 'config.env'));
 
 console.log('Loaded environment variables in server.js:', {
   MONGODB_URI: process.env.MONGODB_URI ? '[CONFIGURED]' : '[MISSING]',
@@ -21,6 +38,12 @@ if (!process.env.JWT_SECRET) {
   );
   process.exit(1);
 }
+
+const { isMailConfigured, missingMailKeys } = require('./utils/mailer');
+console.log(
+  'Contact email:',
+  isMailConfigured() ? '[CONFIGURED]' : `[MISSING ${missingMailKeys().join(', ')}]`,
+);
 
 const app = require('./app');
 const User = require('./models/User');
