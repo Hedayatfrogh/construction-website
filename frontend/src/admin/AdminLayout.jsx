@@ -238,9 +238,13 @@ export default function AdminLayout() {
       {/* ── Sidebar (desktop) ──────────────────────────────────────────── */}
       <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 md:bg-navy-800 md:text-white">
         <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
-          <div className="h-9 w-9 rounded-md bg-smsorange-500 grid place-items-center font-display font-extrabold text-white">
-            S
-          </div>
+          <img
+            src="/images/sms-logo.png"
+            alt="SMS"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-[8px] object-contain shrink-0"
+          />
           <div className="leading-tight">
             <div className="font-bold">SMS</div>
             <div className="text-[11px] uppercase tracking-[0.18em] text-smsgold-400">

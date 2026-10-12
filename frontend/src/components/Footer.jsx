@@ -50,9 +50,13 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-4 min-w-0">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-md bg-smsorange-500 text-white grid place-items-center font-display font-extrabold shrink-0">
-                {t("brandShort")}
-              </div>
+              <img
+                src="/images/sms-logo.png"
+                alt={t("brandShort")}
+                width={44}
+                height={44}
+                className="h-10 w-10 rounded-[10px] object-contain shrink-0"
+              />
               <div className="min-w-0">
                 <div className="font-display font-bold">{t("brandName")}</div>
                 <div className="text-xs uppercase tracking-[0.18em] text-white/60">

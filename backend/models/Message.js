@@ -10,9 +10,10 @@ const messageSchema = new mongoose.Schema(
       required: [true, 'Email is required'],
       trim: true,
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email.'],
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'Please provide a valid email.'],
     },
     phone: { type: String, default: '', trim: true, maxlength: 40 },
+    subject: { type: String, default: '', trim: true, maxlength: 200 },
     description: { type: String, required: [true, 'Description is required'], trim: true, maxlength: 5000 },
     websiteId: {
       type: String,

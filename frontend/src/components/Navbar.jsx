@@ -44,10 +44,13 @@ function Logo() {
       className='flex items-center gap-3 shrink-0 group'
       aria-label={company.shortName + ' Home'}
     >
-      <span className='relative inline-flex h-10 w-10 items-center justify-center rounded-md bg-smsorange-500 font-display font-extrabold text-white shadow-sms-soft'>
-        {t('brandShort')}
-        <span className='absolute -bottom-1 -right-1 h-3 w-3 rounded-sm bg-smsgold-400 ring-2 ring-white' />
-      </span>
+      <img
+        src='/images/sms-logo.png'
+        alt={t('brandShort')}
+        width={44}
+        height={44}
+        className='h-10 w-10 sm:h-11 sm:w-11 rounded-[10px] object-contain shrink-0 shadow-sms-soft'
+      />
       <span className='hidden sm:flex flex-col leading-tight min-w-0'>
         <span className='font-display font-bold text-base md:text-lg text-charcoal-900 whitespace-nowrap'>
           {t('brandName')}

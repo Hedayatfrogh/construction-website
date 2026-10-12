@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -86,9 +86,13 @@ export default function AdminLogin() {
           transition={{ duration: 0.3 }}
           className="flex justify-center"
         >
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#f28b24] shadow-[0_4px_10px_rgba(242,139,36,0.25)]">
-            <Shield className="h-9 w-9 text-white" strokeWidth={2.3} />
-          </div>
+          <img
+            src="/images/sms-logo.png"
+            alt="SMS"
+            width={80}
+            height={80}
+            className="h-20 w-20 rounded-[18px] object-contain shadow-[0_4px_10px_rgba(242,139,36,0.25)]"
+          />
         </motion.div>
 
         <motion.h2
