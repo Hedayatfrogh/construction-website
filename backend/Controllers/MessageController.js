@@ -1,35 +1,100 @@
 const catchAsync = require('../utils/CatchAsync');
 const AppError = require('../utils/AppError');
 const Message = require('../models/Message');
+const { isMailConfigured, missingMailKeys, getMailConfig, sendMail } = require('../utils/mailer');
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+
+const toWesternDigits = (value) =>
+  String(value ?? '')
+    .replace(/[۰-۹]/g, (d) => String(PERSIAN_DIGITS.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
+
+const str = (value, max) => String(value ?? '').trim().slice(0, max);
 
 exports.createMessage = catchAsync(async (req, res, next) => {
-  const { firstName, lastName, company, email, phone, description, websiteId } =
-    req.body;
+  if (str(req.body.website, 200) || str(req.body.fax, 200)) {
+    return res.status(204).send();
+  }
 
+  const websiteId = req.body.websiteId || 'azad_noori';
   if (!['spark_trust', 'azad_noori'].includes(websiteId)) {
     return next(new AppError('Invalid websiteId', 400));
   }
 
+  const fullName = str(req.body.fullName, 150);
+  let firstName = str(req.body.firstName, 100);
+  let lastName = str(req.body.lastName, 100);
+  if (fullName && !firstName) {
+    const parts = fullName.split(/\s+/);
+    firstName = parts.shift() || '';
+    lastName = parts.join(' ');
+  }
+  const email = str(req.body.email, 254).toLowerCase();
+  const phone = toWesternDigits(str(req.body.phone, 40));
+  const company = str(req.body.company, 150);
+  const subject = str(req.body.subject, 200);
+  const description = str(req.body.message || req.body.description, 5000);
+
+  if (!firstName) return next(new AppError('Full name is required.', 400));
+  if (!EMAIL_RE.test(email)) return next(new AppError('Please provide a valid email address.', 400));
+  if (description.length < 10) {
+    return next(new AppError('Please enter a message of at least 10 characters.', 400));
+  }
   const newMessage = await Message.create({
     firstName,
-    lastName: lastName || '',
-    company: company || '',
+    lastName,
+    company,
     email,
-    phone: phone || '',
+    phone,
+    subject,
     description,
     websiteId,
   });
+
+  if (!isMailConfigured()) {
+    const missing = missingMailKeys().join(', ');
+    console.error(`Contact saved but email not sent: missing ${missing}`);
+    return next(
+      new AppError(
+        `Your message was saved, but email is not configured. Set ${missing} in the backend environment and restart or redeploy the server.`,
+        503,
+      ),
+    );
+  }
+
+  const { contactTo } = getMailConfig();
+  const displayName = [firstName, lastName].filter(Boolean).join(' ');
+  try {
+    await sendMail({
+      to: contactTo,
+      replyTo: email,
+      subject: subject ? `SMS contact: ${subject}` : `SMS contact from ${displayName}`,
+      text: [
+        'New message from the SMS website contact form.',
+        '',
+        `Name: ${displayName}`,
+        `Email: ${email}`,
+        `Phone: ${phone || '—'}`,
+        `Company: ${company || '—'}`,
+        `Subject: ${subject || '—'}`,
+        '',
+        description,
+      ].join('\n'),
+    });
+  } catch (err) {
+    console.error('Contact email delivery failed:', err.code || err.message);
+    return next(
+      new AppError('Your message was saved, but email delivery failed. Please try again later.', 503),
+    );
+  }
 
   res.status(201).json({
     status: 'success',
     data: {
       id: newMessage.id || newMessage._id,
-      firstName: newMessage.firstName,
-      lastName: newMessage.lastName,
-      company: newMessage.company,
-      email: newMessage.email,
-      description: newMessage.description,
-      websiteId: newMessage.websiteId,
     },
   });
 });

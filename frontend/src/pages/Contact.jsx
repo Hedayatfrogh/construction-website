@@ -24,6 +24,7 @@ const initialForm = {
   company: "",
   subject: "",
   message: "",
+  website: "",
 };
 
 export default function Contact() {
@@ -74,25 +75,36 @@ export default function Contact() {
     try {
       const [firstName, ...rest] = form.fullName.trim().split(/\s+/);
       const message = form.message.trim();
-      await api.post("/messages", {
-        firstName,
-        lastName: rest.join(" "),
-        email: form.email.trim(),
-        phone: (() => {
-          const raw = form.phone.trim();
-          if (lang === "fa" && raw && !raw.startsWith("+")) {
-            return `+93 ${raw.replace(/^93[\s-]*/, "")}`;
-          }
-          return raw;
-        })(),
-        company: form.company.trim(),
-        description: form.subject.trim() ? `${form.subject.trim()}\n\n${message}` : message,
-        websiteId: "azad_noori",
-      });
+      await api.post(
+        "/messages",
+        {
+          fullName: form.fullName.trim(),
+          firstName,
+          lastName: rest.join(" "),
+          email: form.email.trim(),
+          phone: (() => {
+            const raw = form.phone.trim();
+            if (lang === "fa" && raw && !raw.startsWith("+")) {
+              return `+93 ${raw.replace(/^93[\s-]*/, "")}`;
+            }
+            return raw;
+          })(),
+          company: form.company.trim(),
+          subject: form.subject.trim(),
+          message,
+          description: form.subject.trim() ? `${form.subject.trim()}\n\n${message}` : message,
+          websiteId: "azad_noori",
+          website: form.website,
+        },
+        { timeout: 25000 },
+      );
       setStatus({ kind: "success", text: t("contact.successMessage") });
       setForm(initialForm);
-    } catch {
-      setStatus({ kind: "error", text: t("contact.errorMessage") });
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        text: error.response?.data?.message || t("contact.errorMessage"),
+      });
     } finally {
       setSubmitting(false);
     }
@@ -186,8 +198,18 @@ export default function Contact() {
           <Reveal delay={0.05}>
             <form
               onSubmit={onSubmit}
-              className="rounded-2xl bg-white border border-charcoal-100 shadow-sms-soft p-7"
+              className="relative rounded-2xl bg-white border border-charcoal-100 shadow-sms-soft p-7"
             >
+              <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form.website}
+                  onChange={update("website")}
+                />
+              </div>
               <h2 className="font-display text-2xl font-bold text-charcoal-900">
                 {t("contact.formTitle")}
               </h2>

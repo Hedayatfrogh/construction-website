@@ -4,13 +4,42 @@ const configuredUrl =
   import.meta.env.VITE_API_URL?.trim() ||
   import.meta.env.VITE_API_BASE_URL?.trim();
 const normalizedUrl = configuredUrl?.replace(/\/+$/, "");
-const baseURL = normalizedUrl
+const isAbsoluteHttpUrl = (() => {
+  if (!normalizedUrl) return false;
+  try {
+    const url = new URL(normalizedUrl);
+    return (
+      ["http:", "https:"].includes(url.protocol) &&
+      Boolean(url.hostname) &&
+      !url.username &&
+      !url.password
+    );
+  } catch {
+    return false;
+  }
+})();
+const productionApiUrl = "https://backend.sparktrust.tech/api/v1";
+const configuredBaseURL = normalizedUrl
   ? /\/api\/v1$/i.test(normalizedUrl)
     ? normalizedUrl
     : `${normalizedUrl}/api/v1`
-  : import.meta.env.PROD
-    ? "https://backend.sparktrust.tech/api/v1"
-    : "/api/v1";
+  : "";
+
+let baseURL;
+if (import.meta.env.PROD) {
+  if (configuredBaseURL && isAbsoluteHttpUrl) {
+    baseURL = configuredBaseURL;
+  } else {
+    if (configuredBaseURL) {
+      console.error(
+        "Ignoring relative VITE_API_URL in production; set it to the absolute backend URL.",
+      );
+    }
+    baseURL = productionApiUrl;
+  }
+} else {
+  baseURL = configuredBaseURL || "/api/v1";
+}
 
 const api = axios.create({ baseURL, withCredentials: true, timeout: 10000 });
 
