@@ -2,6 +2,12 @@
 // Single source of truth for verified company facts (per Company Profile).
 // Where the Company Profile does not provide a value, we DO NOT invent it.
 
+export const vision =
+  "To be a trusted leader in construction and infrastructure development, driving sustainable growth and transforming landscapes. Through our commitment to excellence, innovation, and social responsibility, we aim to build resilient communities, enhance connectivity, and create a lasting legacy for future generations.";
+
+export const mission =
+  "To create enduring infrastructure that transforms communities and enhances connectivity. Through our expertise in construction and road building, we strive to deliver exceptional projects that exceed client expectations, foster sustainable development, and improve the quality of life for individuals and businesses alike.";
+
 export const company = {
   name: "Sayed Musawer Sadat Construction and Engineering Design Company",
   shortName: "SMS",
@@ -23,13 +29,9 @@ export const company = {
     linkedin: "",
     instagram: "",
   },
+  vision,
+  mission,
 };
-
-export const vision =
-  "To become Afghanistan's most trusted and innovative construction and engineering design company, recognized for delivering infrastructure that elevates communities, supports national development, and sets the benchmark for quality, safety, and sustainability.";
-
-export const mission =
-  "To deliver high-quality, safe, and sustainable construction and engineering solutions across every project we undertake — from high-rise buildings and infrastructure to water systems, energy, and rehabilitation works — by combining experienced professionals, modern methods, and an unwavering commitment to our clients and communities.";
 
 export const heroIntro =
   "Sayed Musawer Sadat Construction and Engineering Design Company (SMS) is an Afghan construction and engineering firm delivering high-rise buildings, infrastructure, water & irrigation systems, renewable energy, and rehabilitation works — combining engineering excellence with an unwavering commitment to safety, quality, and sustainability.";

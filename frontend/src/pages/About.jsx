@@ -2,7 +2,7 @@ import PageHero from "../components/ui/PageHero";
 import SectionHeader from "../components/ui/SectionHeader";
 import Reveal from "../components/ui/Reveal";
 import CTASection from "../components/ui/CTASection";
-import { company, vision, mission } from "../data/company";
+import { company } from "../data/company";
 import { values } from "../data/content";
 import { useLanguage } from "../context/LanguageContext";
 import { useContentSection } from "../data/contentStore";
@@ -89,7 +89,7 @@ export default function About() {
         breadcrumbs={[{ label: t("nav.about") }]}
       />
       <section className="sms-section bg-white">
-        <div className="sms-container grid gap-12 xl:grid-cols-[1.5fr_1fr]">
+        <div className="sms-container max-w-3xl">
           <Reveal>
             <SectionHeader
               eyebrow={t("about.overviewEyebrow")}
@@ -113,21 +113,34 @@ export default function About() {
               </p>
             </div>
           </Reveal>
-          <Reveal delay={0.1}>
-            <div className="rounded-2xl border border-charcoal-100 bg-charcoal-50 p-6">
-              <div className="sms-eyebrow">{t("about.vision")}</div>
-              <p className="mt-3 text-charcoal-800 leading-relaxed font-medium">
+        </div>
+      </section>
+
+      <section className="sms-section bg-charcoal-50 border-y border-charcoal-100">
+        <div className="sms-container grid gap-8 md:grid-cols-2">
+          <Reveal>
+            <article className="sms-hover-card sms-hover-card--light h-full rounded-2xl border border-charcoal-100 bg-white p-8 shadow-sms-soft">
+              <h2 className="font-display text-2xl font-bold text-charcoal-900">
+                {t("about.vision")}
+              </h2>
+              <p className="mt-4 text-charcoal-600 leading-relaxed">
                 {englishOverride
                   ? companyContent.vision || t("vision")
                   : t("vision")}
               </p>
-              <div className="mt-6 sms-eyebrow">{t("about.mission")}</div>
-              <p className="mt-3 text-charcoal-800 leading-relaxed font-medium">
+            </article>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <article className="sms-hover-card sms-hover-card--light h-full rounded-2xl border border-charcoal-100 bg-white p-8 shadow-sms-soft">
+              <h2 className="font-display text-2xl font-bold text-charcoal-900">
+                {t("about.mission")}
+              </h2>
+              <p className="mt-4 text-charcoal-600 leading-relaxed">
                 {englishOverride
                   ? companyContent.mission || t("mission")
                   : t("mission")}
               </p>
-            </div>
+            </article>
           </Reveal>
         </div>
       </section>
