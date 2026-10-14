@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/CatchAsync');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
+const { isSmtpConfigured, sendMail } = require('../utils/mailer');
 const { createHash, randomBytes } = require('crypto');
 const PasswordReset = require('../models/PasswordReset');
 
@@ -197,9 +197,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   if (!email) return next(new AppError('Email is required.', 400));
 
-  const smtpReady =
-    process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS;
-  if (!smtpReady) {
+  if (!isSmtpConfigured()) {
     return next(
       new AppError('Password recovery is not configured. Contact the site administrator.', 503),
     );
@@ -222,19 +220,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   });
 
   try {
-    const transport = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT || 587),
-      secure: Number(process.env.EMAIL_PORT) === 465,
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
     const resetUrl = new URL(
       '/reset-password',
       process.env.FRONTEND_URL || 'http://localhost:5175',
     );
     resetUrl.searchParams.set('token', rawToken);
-    await transport.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    await sendMail({
       to: user.email,
       subject: 'SMS administrator password reset',
       text: `Use this one-time link within 30 minutes to reset your password: ${resetUrl.toString()}`,

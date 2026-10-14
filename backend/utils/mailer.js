@@ -9,30 +9,51 @@ const env = (...keys) => {
   return '';
 };
 
-exports.getMailConfig = () => ({
-  host: env('SMTP_HOST', 'EMAIL_HOST'),
-  port: Number(env('SMTP_PORT', 'EMAIL_PORT') || 587),
-  user: env('SMTP_USER', 'EMAIL_USER'),
-  pass: env('SMTP_PASS', 'EMAIL_PASS'),
-  from: env('EMAIL_FROM', 'SMTP_USER', 'EMAIL_USER'),
-  contactTo: env('CONTACT_EMAIL'),
-});
+exports.getMailConfig = () => {
+  const user = env('SMTP_USER', 'EMAIL_USER');
+  const from = env('EMAIL_FROM') || user;
+  return {
+    host: env('SMTP_HOST', 'EMAIL_HOST'),
+    port: Number(env('SMTP_PORT', 'EMAIL_PORT') || 587),
+    user,
+    pass: env('SMTP_PASS', 'EMAIL_PASS'),
+    from,
+    contactTo: env('CONTACT_EMAIL'),
+  };
+};
 
-exports.missingMailKeys = () => {
-  const { host, port, user, pass, contactTo } = exports.getMailConfig();
+exports.missingSmtpKeys = () => {
+  const { host, port, user, pass } = exports.getMailConfig();
   const missing = [];
   if (!host) missing.push('SMTP_HOST');
   if (!Number.isInteger(port) || port < 1 || port > 65535) missing.push('SMTP_PORT');
   if (!user) missing.push('SMTP_USER');
   if (!pass) missing.push('SMTP_PASS');
+  return missing;
+};
+
+exports.missingMailKeys = () => {
+  const missing = exports.missingSmtpKeys();
+  const { contactTo } = exports.getMailConfig();
   if (!EMAIL_RE.test(contactTo)) missing.push('CONTACT_EMAIL');
   return missing;
 };
 
-exports.isMailConfigured = () => exports.missingMailKeys().length === 0;
+exports.isSmtpConfigured = () => exports.missingSmtpKeys().length === 0;
+
+exports.isMailConfigured = () => exports.isSmtpConfigured() && exports.missingMailKeys().length === 0;
+
+/** Safe API message when contact email cannot be sent (no secrets). */
+exports.contactMailNotReadyMessage = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'We could not send your message right now. Please try again later or reach us by phone.';
+  }
+  const missing = exports.missingMailKeys();
+  return `Email is not configured on the server. Set ${missing.join(', ')} in the backend environment and restart the server.`;
+};
 
 exports.createTransport = () => {
-  const missing = exports.missingMailKeys();
+  const missing = exports.missingSmtpKeys();
   if (missing.length) {
     throw new Error(`SMTP is not configured: missing or invalid ${missing.join(', ')}`);
   }

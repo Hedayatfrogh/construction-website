@@ -1,7 +1,13 @@
 const catchAsync = require('../utils/CatchAsync');
 const AppError = require('../utils/AppError');
 const Message = require('../models/Message');
-const { isMailConfigured, missingMailKeys, getMailConfig, sendMail } = require('../utils/mailer');
+const {
+  isMailConfigured,
+  missingMailKeys,
+  getMailConfig,
+  sendMail,
+  contactMailNotReadyMessage,
+} = require('../utils/mailer');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
@@ -43,6 +49,12 @@ exports.createMessage = catchAsync(async (req, res, next) => {
   if (description.length < 10) {
     return next(new AppError('Please enter a message of at least 10 characters.', 400));
   }
+
+  if (!isMailConfigured()) {
+    console.error(`Contact form rejected: missing ${missingMailKeys().join(', ')}`);
+    return next(new AppError(contactMailNotReadyMessage(), 503));
+  }
+
   const newMessage = await Message.create({
     firstName,
     lastName,
@@ -53,17 +65,6 @@ exports.createMessage = catchAsync(async (req, res, next) => {
     description,
     websiteId,
   });
-
-  if (!isMailConfigured()) {
-    const missing = missingMailKeys().join(', ');
-    console.error(`Contact saved but email not sent: missing ${missing}`);
-    return next(
-      new AppError(
-        `Your message was saved, but email is not configured. Set ${missing} in the backend environment and restart or redeploy the server.`,
-        503,
-      ),
-    );
-  }
 
   const { contactTo } = getMailConfig();
   const displayName = [firstName, lastName].filter(Boolean).join(' ');
