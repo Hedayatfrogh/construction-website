@@ -5,7 +5,11 @@ import { formatPhoneDisplay } from "../../utils/phoneDisplay";
 export default function PhoneNumber({ value, className = "" }) {
   const { lang } = useLanguage();
   return (
-    <span className={className} dir="ltr">
+    <span
+      className={className}
+      dir="ltr"
+      style={{ unicodeBidi: "isolate", whiteSpace: "nowrap" }}
+    >
       {formatPhoneDisplay(value, lang)}
     </span>
   );

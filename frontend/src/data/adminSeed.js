@@ -86,7 +86,7 @@ export const EMPTY_JOB = () => ({
 });
 
 export const DEFAULT_SETTINGS = () => ({
-  contactEmail: "",
+  contactEmail: "ahmadi.drhamed@gmail.com",
   contactPhone: "+93 747777788",
   addressLines: [
     "Flat #6, Kabul, Afghanistan",

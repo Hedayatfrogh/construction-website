@@ -9,6 +9,7 @@ const env = (...keys) => {
   return '';
 };
 
+<<<<<<< HEAD
 exports.getMailConfig = () => {
   const user = env('SMTP_USER', 'EMAIL_USER');
   const from = env('EMAIL_FROM') || user;
@@ -21,6 +22,16 @@ exports.getMailConfig = () => {
     contactTo: env('CONTACT_EMAIL'),
   };
 };
+=======
+exports.getMailConfig = () => ({
+  host: env('SMTP_HOST', 'EMAIL_HOST'),
+  port: Number(env('SMTP_PORT', 'EMAIL_PORT') || 587),
+  user: env('SMTP_USER', 'EMAIL_USER'),
+  pass: env('SMTP_PASS', 'EMAIL_PASS').replace(/\s+/g, ''),
+  from: env('SMTP_FROM', 'EMAIL_FROM', 'SMTP_USER', 'EMAIL_USER'),
+  contactTo: env('CONTACT_EMAIL', 'SMTP_USER', 'EMAIL_USER'),
+});
+>>>>>>> 8c8c075c12a6fea126da96f76094a07e9f08a350
 
 exports.missingSmtpKeys = () => {
   const { host, port, user, pass } = exports.getMailConfig();

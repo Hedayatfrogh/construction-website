@@ -25,13 +25,16 @@ module.exports = (err, req, res, next) => {
   const statusCode = known ? known.statusCode : err.statusCode || 500;
   let message = known ? known.message : err.message;
 
-  if (statusCode >= 500 && !known) {
+  if (statusCode >= 500 && !known && !err.isOperational) {
     console.error('Unhandled error:', err);
-    if (!err.isOperational) message = 'Something went wrong. Please try again later.';
+    message = 'Something went wrong. Please try again later.';
+  } else if (statusCode >= 500 && err.isOperational) {
+    console.error(err.message);
   }
 
   res.status(statusCode).json({
     status: statusCode < 500 ? 'fail' : 'error',
     message,
+    ...(err.errorCode ? { code: err.errorCode } : {}),
   });
 };

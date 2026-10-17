@@ -55,7 +55,13 @@ export default function Stats() {
                     <div className="text-[10px] uppercase tracking-[0.2em] text-white/60">{label}</div>
                   </div>
                   <div className="mt-4 font-display text-3xl md:text-4xl font-extrabold">
+<<<<<<< HEAD
                     {isNumeric && s.label !== "Founded" ? (
+=======
+                    {s.label === "Founded" ? (
+                      s.value
+                    ) : isNumeric ? (
+>>>>>>> 8c8c075c12a6fea126da96f76094a07e9f08a350
                       <Counter to={numeric} />
                     ) : (
                       s.value
