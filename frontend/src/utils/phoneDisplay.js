@@ -10,7 +10,8 @@ export const toPersianDigits = (value) =>
 
 export function formatPhoneDisplay(value, lang) {
   const western = toWesternDigits(value).trim();
-  return lang === "fa" ? toPersianDigits(western) : western;
+  if (lang === "fa") return toPersianDigits(western);
+  return western;
 }
 
 export function telHref(value) {

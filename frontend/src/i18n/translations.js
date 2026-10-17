@@ -1169,6 +1169,10 @@ const en = {
       "Thank you. Your message has been received — our team will respond shortly.",
     errorMessage:
       "Something went wrong sending your message. Please try again.",
+    errEmailNotConfigured:
+      "Your message was saved, but email is not configured on the server yet. Please call us or try again later.",
+    errEmailDelivery:
+      "Your message was saved, but email delivery failed. Please try again later.",
     errFullName: "Full name is required",
     errEmailRequired: "Email is required.",
     errEmailInvalid: "Email is invalid",
@@ -3270,6 +3274,10 @@ const fa = {
     successMessage:
       "متشکریم. پیام شما دریافت شد — تیم ما به زودی پاسخ خواهد داد.",
     errorMessage: "خطایی در ارسال پیام شما رخ داد. لطفاً دوباره تلاش کنید.",
+    errEmailNotConfigured:
+      "پیام شما ذخیره شد، اما ارسال ایمیل روی سرور هنوز تنظیم نشده است. لطفاً تماس بگیرید یا بعداً دوباره تلاش کنید.",
+    errEmailDelivery:
+      "پیام شما ذخیره شد، اما ارسال ایمیل ناموفق بود. لطفاً بعداً دوباره تلاش کنید.",
     errFullName: "نام کامل الزامی است",
     errEmailRequired: "ایمیل الزامی است.",
     errEmailInvalid: "ایمیل نامعتبر است",

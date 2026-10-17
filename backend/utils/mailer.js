@@ -13,9 +13,9 @@ exports.getMailConfig = () => ({
   host: env('SMTP_HOST', 'EMAIL_HOST'),
   port: Number(env('SMTP_PORT', 'EMAIL_PORT') || 587),
   user: env('SMTP_USER', 'EMAIL_USER'),
-  pass: env('SMTP_PASS', 'EMAIL_PASS'),
-  from: env('EMAIL_FROM', 'SMTP_USER', 'EMAIL_USER'),
-  contactTo: env('CONTACT_EMAIL'),
+  pass: env('SMTP_PASS', 'EMAIL_PASS').replace(/\s+/g, ''),
+  from: env('SMTP_FROM', 'EMAIL_FROM', 'SMTP_USER', 'EMAIL_USER'),
+  contactTo: env('CONTACT_EMAIL', 'SMTP_USER', 'EMAIL_USER'),
 });
 
 exports.missingMailKeys = () => {

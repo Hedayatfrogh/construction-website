@@ -174,32 +174,35 @@ export default function Footer() {
             <h3 className="font-display font-semibold text-sm tracking-widest uppercase text-smsgold-400">
               {t("footerContactUs")}
             </h3>
-            <ul className="mt-4 space-y-3 text-sm text-white/80">
-              <li>
+            <ul className="mt-4 space-y-2 text-sm text-white/80">
+              <li className="footer-contact-row">
                 <a
                   href={telHref(phone)}
-                  className="footer-link footer-link--with-icon"
-                  aria-label={t("footerCallPhone", formatPhoneDisplay(phone, lang))}
+                  className="footer-contact-row__link"
+                  aria-label={t(
+                    "footerCallPhone",
+                    formatPhoneDisplay(phone, lang),
+                  )}
                 >
-                  <Phone className="footer-link__icon h-4 w-4 text-smsorange-500 shrink-0" />
+                  <Phone className="footer-contact-row__icon h-4 w-4 text-smsorange-500 shrink-0" />
                   <span className="break-all">
                     <PhoneNumber value={phone} />
                   </span>
                 </a>
               </li>
               {email && (
-                <li className="flex gap-2">
-                  <Mail className="h-4 w-4 mt-0.5 text-smsorange-500 shrink-0" />
+                <li className="footer-contact-row">
+                  <Mail className="footer-contact-row__icon h-4 w-4 text-smsorange-500 shrink-0" />
                   <a
                     href={`mailto:${email}`}
-                    className="hover:text-white break-all"
+                    className="footer-contact-row__link break-all"
                   >
                     {email}
                   </a>
                 </li>
               )}
-              <li className="flex gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 text-smsorange-500 shrink-0" />
+              <li className="footer-contact-row" tabIndex={0}>
+                <MapPin className="footer-contact-row__icon h-4 w-4 text-smsorange-500 shrink-0" />
                 <span className="min-w-0">
                   <span className="text-white/60">
                     {t("home.footerCityKabul")}
@@ -207,8 +210,8 @@ export default function Footer() {
                   {lang === "en" ? mainAddress : t("companyInfo.mainOffice")}
                 </span>
               </li>
-              <li className="flex gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 text-smsorange-500 shrink-0" />
+              <li className="footer-contact-row" tabIndex={0}>
+                <MapPin className="footer-contact-row__icon h-4 w-4 text-smsorange-500 shrink-0" />
                 <span className="min-w-0">
                   <span className="text-white/60">
                     {t("home.footerCityNangarhar")}

@@ -1,17 +1,19 @@
 import SectionHeader from "../ui/SectionHeader";
 import MediaSlider from "../ui/MediaSlider";
 import { useLanguage } from "../../context/LanguageContext";
-import constructionSite from "../../assets/Sliders Photos/Constraction.jpg";
-import civilWorks from "../../assets/Sliders Photos/Civil mintnance.jpg";
-import materialHandling from "../../assets/Sliders Photos/material-handling.webp";
-import engineering from "../../assets/Sliders Photos/Maintnance managment.jpg";
+import constructionCrane from "../../assets/OurWork/01_construction_site_crane.png";
+import engineerPlanning from "../../assets/OurWork/02_engineers_planning.png";
+import excavatorTruck from "../../assets/OurWork/03_excavator_and_truck.png";
+import hardhatBlueprints from "../../assets/OurWork/04_sms_hardhat_blueprints.png";
+import bridgeConstruction from "../../assets/OurWork/06_bridge_construction.png";
 
 // Add more slides here. Videos: { type: "video", src: "/videos/site.mp4", poster: someImage }
 const MEDIA = [
-  { type: "image", src: constructionSite, alt: "Engineers reviewing a building under construction" },
-  { type: "image", src: civilWorks, alt: "Site engineers on a concrete deck beneath a tower crane" },
-  { type: "image", src: materialHandling, alt: "Material handling with a forklift" },
-  { type: "image", src: engineering, alt: "Engineering equipment and digital monitoring" },
+  { type: "image", src: constructionCrane, alt: "Construction site crane and building under development" },
+  { type: "image", src: engineerPlanning, alt: "Engineers reviewing plans at a construction site" },
+  { type: "image", src: excavatorTruck, alt: "Excavator loading soil into a truck at a construction site" },
+  { type: "image", src: hardhatBlueprints, alt: "Safety helmet and project blueprints at a worksite" },
+  { type: "image", src: bridgeConstruction, alt: "Bridge construction in progress over a river" },
 ];
 
 export default function MediaShowcase() {

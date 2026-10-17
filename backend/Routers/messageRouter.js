@@ -16,6 +16,7 @@ const contactLimiter = require('express-rate-limit')({
 })
 
 router.post('/', contactLimiter, messageController.createMessage)
+router.get('/contact-info', messageController.getPublicContactInfo)
 
 // Get all messages for a website — admin only
 router.get(

@@ -1,18 +1,31 @@
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import { company } from "../../data/company";
 import SectionHeader from "../ui/SectionHeader";
 import Reveal from "../ui/Reveal";
 import { useLanguage } from "../../context/LanguageContext";
+import { useContentSection } from "../../data/contentStore";
 import PhoneNumber from "../ui/PhoneNumber";
 import { telHref } from "../../utils/phoneDisplay";
 
 export default function ContactStrip() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const companyContent = useContentSection("company", company);
+  const settings = useContentSection("settings", null);
+  const phone = settings?.contactPhone || companyContent.phone;
+  const email = settings?.contactEmail || companyContent.email;
+  const mainAddress =
+    lang === "en"
+      ? settings?.addressLines?.[0] || companyContent.offices?.main
+      : t("contact.mainAddress");
+  const branchAddress =
+    lang === "en"
+      ? settings?.addressLines?.[1] || companyContent.offices?.branch
+      : t("contact.branchAddress");
   const items = [
-    { icon: Phone,  label: t("home.contactCallUs"),            value: company.phone,                                       href: telHref(company.phone) },
-    { icon: Mail,   label: t("home.contactEmail"),             value: company.email || t("home.contactEmailPlaceholder"), href: company.email ? `mailto:${company.email}` : null },
-    { icon: MapPin, label: t("home.contactKabulOffice"),       value: company.offices.main,                                href: null },
-    { icon: MapPin, label: t("home.contactNangarharOffice"),   value: company.offices.branch,                               href: null },
+    { icon: Phone,  label: t("home.contactCallUs"),            value: phone,                                       href: telHref(phone) },
+    { icon: Mail,   label: t("home.contactEmail"),             value: email || t("home.contactEmailPlaceholder"), href: email ? `mailto:${email}` : null },
+    { icon: MapPin, label: t("home.contactKabulOffice"),       value: mainAddress,                                href: null },
+    { icon: MapPin, label: t("home.contactNangarharOffice"),   value: branchAddress,                               href: null },
   ];
   return (
     <section className="bg-white">

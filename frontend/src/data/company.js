@@ -17,7 +17,7 @@ export const company = {
   licenseNumber: "109547",
   tinNumber: "9032213531",
   ungmNumber: "",
-  email: "",
+  email: "ahmadi.drhamed@gmail.com",
   phone: "+93 747777788",
   offices: {
     main: "Flat #6, Kabul, Afghanistan",

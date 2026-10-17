@@ -59,7 +59,7 @@ export default function Contact() {
     const e = {};
     if (!form.fullName.trim()) e.fullName = t("contact.errFullName");
     if (!form.email.trim()) e.email = t("contact.errEmailRequired");
-    else if (!/\S+@\S+\.\S+/.test(form.email))
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email))
       e.email = t("contact.errEmailInvalid");
     if (!form.message.trim() || form.message.trim().length < 10)
       e.message = t("contact.errMessage");
@@ -101,9 +101,16 @@ export default function Contact() {
       setStatus({ kind: "success", text: t("contact.successMessage") });
       setForm(initialForm);
     } catch (error) {
+      const code = error.response?.data?.code;
+      const mapped =
+        code === "EMAIL_NOT_CONFIGURED"
+          ? t("contact.errEmailNotConfigured")
+          : code === "EMAIL_DELIVERY_FAILED"
+            ? t("contact.errEmailDelivery")
+            : error.response?.data?.message || t("contact.errorMessage");
       setStatus({
         kind: "error",
-        text: error.response?.data?.message || t("contact.errorMessage"),
+        text: mapped,
       });
     } finally {
       setSubmitting(false);
@@ -267,13 +274,14 @@ export default function Contact() {
                   {lang === "fa" ? (
                     <div
                       dir="ltr"
-                      className="mt-1 flex w-full overflow-hidden rounded-md border border-charcoal-200 shadow-sm focus-within:border-smsorange-400 focus-within:ring-2 focus-within:ring-smsorange-200"
+                      className="mt-1 flex flex-row w-full overflow-hidden rounded-md border border-charcoal-200 shadow-sm focus-within:border-smsorange-400 focus-within:ring-2 focus-within:ring-smsorange-200"
                     >
                       <span
                         dir="ltr"
                         className="inline-flex shrink-0 items-center border-r border-charcoal-200 bg-charcoal-50 px-3 text-sm text-charcoal-700 select-none"
+                        style={{ unicodeBidi: "isolate" }}
                       >
-                        +۹۳
+                        {toPersianDigits("+93")}
                       </span>
                       <input
                         id="phone"

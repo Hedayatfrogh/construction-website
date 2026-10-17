@@ -59,8 +59,9 @@ exports.createMessage = catchAsync(async (req, res, next) => {
     console.error(`Contact saved but email not sent: missing ${missing}`);
     return next(
       new AppError(
-        `Your message was saved, but email is not configured. Set ${missing} in the backend environment and restart or redeploy the server.`,
+        'Your message was saved, but email is not configured on the server.',
         503,
+        'EMAIL_NOT_CONFIGURED',
       ),
     );
   }
@@ -87,7 +88,11 @@ exports.createMessage = catchAsync(async (req, res, next) => {
   } catch (err) {
     console.error('Contact email delivery failed:', err.code || err.message);
     return next(
-      new AppError('Your message was saved, but email delivery failed. Please try again later.', 503),
+      new AppError(
+        'Your message was saved, but email delivery failed. Please try again later.',
+        503,
+        'EMAIL_DELIVERY_FAILED',
+      ),
     );
   }
 
@@ -95,6 +100,16 @@ exports.createMessage = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       id: newMessage.id || newMessage._id,
+    },
+  });
+});
+
+exports.getPublicContactInfo = catchAsync(async (req, res) => {
+  const { contactTo } = getMailConfig();
+  res.status(200).json({
+    status: 'success',
+    data: {
+      email: EMAIL_RE.test(contactTo) ? contactTo : '',
     },
   });
 });
