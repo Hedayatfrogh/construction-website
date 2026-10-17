@@ -39,8 +39,18 @@ export function loadContent(force = false) {
   if (loadPromise && !force) return loadPromise;
   loadPromise = api
     .get("/content")
-    .then((res) => {
+    .then(async (res) => {
       cache = res.data?.data?.sections || {};
+      try {
+        const info = await api.get("/messages/contact-info");
+        const publicEmail = info.data?.data?.email;
+        if (publicEmail) {
+          cache.settings = { ...(cache.settings || {}) };
+          if (!cache.settings.contactEmail) cache.settings.contactEmail = publicEmail;
+        }
+      } catch {
+        /* public inbox is optional when SMTP is unset */
+      }
       status = { loaded: true, error: null };
     })
     .catch((err) => {

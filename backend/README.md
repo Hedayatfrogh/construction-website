@@ -12,9 +12,10 @@ hosting provider's server-side environment settings:
 - `SMTP_HOST`
 - `SMTP_PORT` (usually `587`; use `465` for implicit TLS)
 - `SMTP_USER`
-- `SMTP_PASS`
+- `SMTP_PASS` (Gmail App Password; spaces are ignored)
+- `SMTP_FROM` (optional From header; falls back to `EMAIL_FROM`, then `SMTP_USER`)
 - `CONTACT_EMAIL` (the administrator's receiving inbox)
-- `EMAIL_FROM` (optional; defaults to `SMTP_USER`)
+- `EMAIL_FROM` (optional alias for `SMTP_FROM`)
 
 For Gmail, use `smtp.gmail.com` with a Google App Password, not the account
 password. Keep credentials in the backend host's secret/environment settings;
