@@ -5,10 +5,10 @@ import construction from "../../assets/Sliders Photos/Constraction.jpg";
 import civil from "../../assets/Sliders Photos/Civil mintnance.jpg";
 import maintenance from "../../assets/Sliders Photos/Maintnance managment.jpg";
 import material from "../../assets/Sliders Photos/material-handling.webp";
-import management from "../../assets/Sliders Photos/project management.jpg";
-import technical from "../../assets/Sliders Photos/technical services.webp";
-import preventive from "../../assets/Sliders Photos/Preventive Mintnance.jpg";
-import vision from "../../assets/Sliders Photos/Our vision.jpg";
+import management from "../../assets/Sliders Photos/Warehouse managment.jpg";
+import vision from "../../assets/Sliders Photos/creatingandimplementingasystemofassettaggingcanmakeabigdifferenceinabusinesssabilitytosuccessfullyre.jpg";
+import technical from "../../assets/Sliders Photos/Serene-MMS-Home-Page-13-1024x683.jpg";
+import preventive from "../../assets/Optimized/02_field_engineer_at_work.jpg";
 import mission from "../../assets/Sliders Photos/mission.jpg";
 
 export const photos = { construction, civil, maintenance, material, management, technical, preventive, vision, mission };

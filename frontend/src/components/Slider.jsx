@@ -20,18 +20,14 @@ import safetyBriefing from "../assets/SafetyQuality/03_safety_briefing.png";
 import sustainabilityAfghanMountains from "../assets/Sustainability/sustainability-afghan-mountains.png";
 import sustainabilityMountainValley from "../assets/Sustainability/sustainability-mountain-valley.png";
 import sustainabilityGreenerFuture from "../assets/Sustainability/sustainability-greener-mountain-future.png";
-import methodologyPlanning from "../assets/Methodology/01_planning_and_analysis.png";
-import methodologyDesign from "../assets/Methodology/02_design_and_engineering.png";
-import methodologyExecution from "../assets/Methodology/03_execution_and_construction.png";
-import methodologyQuality from "../assets/Methodology/04_quality_and_safety_control.png";
-import methodologySustainable from "../assets/Methodology/05_sustainable_results.png";
-import methodologyHandover from "../assets/Methodology/06_handover_and_support.png";
+import buildingConstruction from "../assets/AboutWork/01_building_construction.jpg";
+import heavyMachinery from "../assets/AboutWork/04_heavy_machinery.jpg";
 import equipmentConcreteMixer from "../assets/Equipment/01_concrete_mixer.png";
 import equipmentWheelLoader from "../assets/Equipment/02_wheel_loader.png";
 import equipmentExcavator from "../assets/Equipment/03_excavator.png";
 import aboutTeamBriefing from "../assets/AboutHome/01_site_team_briefing.png";
 import aboutEngineerOverseeingSite from "../assets/AboutHome/02_engineer_overseeing_site.png";
-import aboutConstructionTeam from "../assets/AboutHome/03_construction_team.png";
+import engineersPlanning from "../assets/OurWork/02_engineers_planning.png";
 import aboutPlansAndSafety from "../assets/AboutHome/04_plans_and_safety.png";
 
 export default function Slider() {
@@ -46,7 +42,7 @@ export default function Slider() {
       <PageSlider theme="charcoal" eyebrow={t("nav.about")} items={[
         { src: aboutTeamBriefing, caption: t("team.title") },
         { src: aboutEngineerOverseeingSite, caption: t("about.overviewTitle") },
-        { src: aboutConstructionTeam, caption: t("team.engineeringTitle") },
+        { src: engineersPlanning, caption: t("team.engineeringTitle") },
         { src: aboutPlansAndSafety, caption: t("methodologySteps.1.title") },
       ]} />
       <SafetyQuality />
@@ -63,12 +59,12 @@ export default function Slider() {
       ]} />
       <Methodology />
       <PageSlider theme="white" eyebrow={t("nav.methodology")} items={[
-        { src: methodologyPlanning, caption: t("methodologySteps.1.title") },
-        { src: methodologyDesign, caption: t("methodologySteps.2.title") },
-        { src: methodologyExecution, caption: t("methodologySteps.3.title") },
-        { src: methodologyQuality, caption: t("methodologySteps.4.title") },
-        { src: methodologySustainable, caption: t("methodologySteps.5.title") },
-        { src: methodologyHandover, caption: t("methodologySteps.6.title") },
+        { src: aboutPlansAndSafety, caption: t("methodologySteps.1.title") },
+        { src: engineersPlanning, caption: t("methodologySteps.2.title") },
+        { src: heavyMachinery, caption: t("methodologySteps.3.title") },
+        { src: buildingConstruction, caption: t("methodologySteps.4.title") },
+        { src: qualityControl, caption: t("methodologySteps.5.title") },
+        { src: aboutEngineerOverseeingSite, caption: t("methodologySteps.6.title") },
       ]} />
       <EquipmentShowcase />
       <PageSlider theme="charcoal" eyebrow={t("nav.equipment")} items={[
