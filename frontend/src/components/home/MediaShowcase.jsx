@@ -1,4 +1,3 @@
-import SectionHeader from "../ui/SectionHeader";
 import MediaSlider from "../ui/MediaSlider";
 import { useLanguage } from "../../context/LanguageContext";
 import buildingConstruction from "../../assets/AboutWork/01_building_construction.jpg";

@@ -60,7 +60,11 @@ export default function ServicesGrid() {
                   : s.summary;
             const image = SERVICE_IMAGES[s.slug];
             return (
-              <Reveal key={s.slug} delay={i * 0.05}>
+              <Reveal
+                key={s.slug}
+                delay={i * 0.05}
+                className={`h-full min-w-0 xl:col-span-2 ${i === 5 ? "xl:col-start-4" : ""} ${i === 6 ? "xl:col-start-6" : ""}`}
+              >
                 <Link
                   to={`/services/${s.slug}`}
                   state={{ from: "/#services" }}

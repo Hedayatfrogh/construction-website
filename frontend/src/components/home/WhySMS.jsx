@@ -60,7 +60,7 @@ export default function WhySMS() {
           align="center"
           titleSize="lg"
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-10">
           {values.map((v, i) => {
             const k = valueKeyMap[v.title];
             const title = k ? t(`${k}.title`) : v.title;
@@ -68,7 +68,11 @@ export default function WhySMS() {
             const detail = pillarDetails[v.title];
             const image = PILLAR_IMAGES[v.title];
             return (
-              <Reveal key={v.title} delay={i * 0.05}>
+              <Reveal
+                key={v.title}
+                delay={i * 0.05}
+                className={`h-full min-w-0 xl:col-span-2 ${i === 5 ? "xl:col-start-4" : ""} ${i === 6 ? "xl:col-start-6" : ""}`}
+              >
                 <button
                   type="button"
                   onClick={() => detail && setActivePillar(v)}

@@ -39,7 +39,11 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-const { isMailConfigured, missingMailKeys } = require('./utils/mailer');
+const { isMailConfigured, isSmtpConfigured, missingMailKeys, missingSmtpKeys } = require('./utils/mailer');
+console.log(
+  'SMTP:',
+  isSmtpConfigured() ? '[CONFIGURED]' : `[MISSING ${missingSmtpKeys().join(', ')}]`,
+);
 console.log(
   'Contact email:',
   isMailConfigured() ? '[CONFIGURED]' : `[MISSING ${missingMailKeys().join(', ')}]`,

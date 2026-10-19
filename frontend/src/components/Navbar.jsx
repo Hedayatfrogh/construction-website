@@ -41,7 +41,7 @@ function Logo() {
   return (
     <NavLinkSmart
       to='/'
-      className='flex items-center gap-3 shrink-0 group'
+      className='flex items-center gap-2 sm:gap-3 shrink-0 group'
       aria-label={company.shortName + ' Home'}
     >
       <img
@@ -49,7 +49,7 @@ function Logo() {
         alt={t('brandShort')}
         width={44}
         height={44}
-        className='h-10 w-10 sm:h-11 sm:w-11 rounded-[10px] object-contain shrink-0 shadow-sms-soft'
+        className='h-9 w-9 sm:h-10 sm:w-10 xl:h-11 xl:w-11 rounded-[10px] object-contain shrink-0 shadow-sms-soft'
       />
       <span className='hidden sm:flex flex-col leading-tight min-w-0'>
         <span className='font-display font-bold text-base md:text-lg text-charcoal-900 whitespace-nowrap'>
@@ -81,7 +81,7 @@ export default function Navbar() {
   const linkClass = ({ isActive }) =>
     [
       "relative inline-flex items-center",
-      "px-1 py-2 text-[13px] font-medium whitespace-nowrap",
+      "px-1 py-2 text-xs 2xl:text-[13px] font-medium whitespace-nowrap",
       "transition-colors duration-150",
       isActive
         ? "text-smsorange-500"
@@ -122,9 +122,9 @@ export default function Navbar() {
     >
       <div
         className={[
-          "w-full px-4 sm:px-6 lg:px-10",
+          "mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-10",
           "flex flex-nowrap items-center justify-between",
-          "h-20 gap-4 xl:gap-5 2xl:gap-6",
+          "h-16 sm:h-[4.5rem] xl:h-20 gap-2 sm:gap-4 xl:gap-3 2xl:gap-5",
           "min-w-0",
         ].join(" ")}
       >
@@ -132,7 +132,7 @@ export default function Navbar() {
 
         <nav
           aria-label="Primary"
-          className="hidden xl:flex items-center justify-center min-w-0 flex-1 gap-5 2xl:gap-6"
+          className="hidden xl:flex items-center justify-center min-w-0 gap-3 2xl:gap-5"
         >
           {navLinks.map((l) => (
             <NavLinkSmart
@@ -192,12 +192,12 @@ export default function Navbar() {
           aria-controls="primary-mobile-nav"
           className={[
             "xl:hidden inline-flex items-center justify-center",
-            "h-11 w-11 rounded-md shrink-0",
+            "h-10 w-10 sm:h-11 sm:w-11 rounded-md shrink-0",
             "text-charcoal-900 hover:bg-charcoal-100",
             "focus:outline-none focus:ring-2 focus:ring-smsorange-400",
           ].join(" ")}
         >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {open ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
         </button>
       </div>
 
