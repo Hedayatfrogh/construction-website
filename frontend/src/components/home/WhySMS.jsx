@@ -41,21 +41,25 @@ export default function WhySMS() {
           align="center"
           titleSize="lg"
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-10">
           {values.map((v, i) => {
             const k = valueKeyMap[v.title];
             const title = k ? t(`${k}.title`) : v.title;
             const desc  = k ? t(`${k}.description`) : v.description;
             const detail = pillarDetails[v.title];
             return (
-              <Reveal key={v.title} delay={i * 0.05}>
+              <Reveal
+                key={v.title}
+                delay={i * 0.05}
+                className={`h-full min-w-0 xl:col-span-2 ${i === 5 ? "xl:col-start-4" : ""} ${i === 6 ? "xl:col-start-6" : ""}`}
+              >
                 <button
                   type="button"
                   onClick={() => detail && setActivePillar(v)}
                   disabled={!detail}
                   aria-label={t("cards.learnMoreAbout", title)}
                   aria-haspopup={detail ? "dialog" : undefined}
-                  className="sms-hover-card sms-hover-card--light group relative w-full text-left h-full rounded-xl bg-white p-6 border border-charcoal-100 shadow-sm
+                  className="sms-hover-card sms-hover-card--light group relative w-full min-w-0 text-left h-full rounded-xl bg-white p-5 border border-charcoal-100 shadow-sm sm:p-6
                              cursor-pointer
                              transition active:scale-[0.98]
                              focus:outline-none focus-visible:ring-2 focus-visible:ring-smsorange-400 focus-visible:ring-offset-2"
@@ -68,8 +72,8 @@ export default function WhySMS() {
                       <ArrowRight className="h-4 w-4" />
                     </span>
                   </div>
-                  <h3 className="sms-hover-target sms-hover-target--title mt-4 font-display font-bold text-charcoal-900 text-lg">{title}</h3>
-                  <p className="mt-2 text-sm text-charcoal-500 leading-relaxed">{desc}</p>
+                  <h3 className="sms-hover-target sms-hover-target--title mt-4 break-words font-display font-bold text-charcoal-900 text-base sm:text-lg">{title}</h3>
+                  <p className="mt-2 break-words text-sm text-charcoal-500 leading-relaxed">{desc}</p>
                 </button>
               </Reveal>
             );

@@ -27,7 +27,7 @@ export default function ServicesGrid() {
             subtitle={t("home.servicesSubtitle")}
           />
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-10">
           {serviceList.map((s, i) => {
             const title =
               hasSavedServices && lang === "en"
@@ -42,7 +42,11 @@ export default function ServicesGrid() {
                   ? tr(s.slug, "summary")
                   : s.summary;
             return (
-              <Reveal key={s.slug} delay={i * 0.05}>
+              <Reveal
+                key={s.slug}
+                delay={i * 0.05}
+                className={`h-full min-w-0 xl:col-span-2 ${i === 5 ? "xl:col-start-4" : ""} ${i === 6 ? "xl:col-start-6" : ""}`}
+              >
                 <Link
                   to={`/services/${s.slug}`}
                   state={{ from: "/#services" }}

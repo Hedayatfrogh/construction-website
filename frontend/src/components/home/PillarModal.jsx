@@ -108,7 +108,7 @@ function ModalPanel({ pillar, pillarTitle, ordinal, onClose, onLearnMore, t }) {
                  max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
     >
       {/* ── Dark navy header band ─────────────────────────────── */}
-      <div className="relative bg-navy-800 text-white px-6 sm:px-8 pt-7 sm:pt-8 pb-8 overflow-hidden">
+      <div className="relative shrink-0 bg-navy-800 text-white px-6 sm:px-8 pt-7 sm:pt-8 pb-8 overflow-hidden">
         <div className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-smsorange-500/15 blur-3xl" aria-hidden="true" />
         <div className="pointer-events-none absolute -bottom-24 -left-12 h-56 w-56 rounded-full bg-smsgold-400/10 blur-3xl" aria-hidden="true" />
 
@@ -149,7 +149,7 @@ function ModalPanel({ pillar, pillarTitle, ordinal, onClose, onLearnMore, t }) {
       </div>
 
       {/* ── Body (scrollable) ──────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-charcoal-50">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-charcoal-50">
         <div className="px-6 sm:px-8 py-6 sm:py-8 space-y-7">
           <PillarBody
             pillar={pillar}

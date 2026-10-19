@@ -40,28 +40,24 @@ export default function Stats() {
     <section className="bg-navy-800 text-white">
       <div className="sms-container py-14 md:py-20">
         <Reveal>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
             {verifiedStats.map((s) => {
               const Icon = iconMap[s.icon] || Building2;
               const numeric = Number(String(s.value).replace(/\D/g, ""));
               const isNumeric = numeric > 0 && String(numeric) === String(s.value);
               const label = labelKeyMap[s.label] ? t(labelKeyMap[s.label]) : s.label;
               return (
-                <div key={s.label} className="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-smsorange-500/50 transition">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-md bg-smsorange-500/15 grid place-items-center text-smsorange-400">
+                <div key={s.label} className="group min-w-0 rounded-xl border border-white/10 bg-white/5 p-3 sm:p-6 hover:border-smsorange-500/50 transition">
+                  <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-md bg-smsorange-500/15 grid place-items-center text-smsorange-400">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-white/60">{label}</div>
+                    <div className="min-w-0 break-normal text-[10px] uppercase tracking-[0.08em] text-white/60 sm:tracking-[0.2em]">{label}</div>
                   </div>
-                  <div className="mt-4 font-display text-3xl md:text-4xl font-extrabold">
-<<<<<<< HEAD
-                    {isNumeric && s.label !== "Founded" ? (
-=======
+                  <div className="mt-3 min-w-0 whitespace-nowrap font-display text-[clamp(0.75rem,3.8vw,1.25rem)] leading-tight font-extrabold sm:mt-4 sm:text-3xl md:text-4xl">
                     {s.label === "Founded" ? (
                       s.value
                     ) : isNumeric ? (
->>>>>>> 8c8c075c12a6fea126da96f76094a07e9f08a350
                       <Counter to={numeric} />
                     ) : (
                       s.value

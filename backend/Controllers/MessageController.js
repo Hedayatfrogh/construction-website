@@ -66,21 +66,6 @@ exports.createMessage = catchAsync(async (req, res, next) => {
     websiteId,
   });
 
-<<<<<<< HEAD
-=======
-  if (!isMailConfigured()) {
-    const missing = missingMailKeys().join(', ');
-    console.error(`Contact saved but email not sent: missing ${missing}`);
-    return next(
-      new AppError(
-        'Your message was saved, but email is not configured on the server.',
-        503,
-        'EMAIL_NOT_CONFIGURED',
-      ),
-    );
-  }
-
->>>>>>> 8c8c075c12a6fea126da96f76094a07e9f08a350
   const { contactTo } = getMailConfig();
   const displayName = [firstName, lastName].filter(Boolean).join(' ');
   try {

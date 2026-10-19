@@ -1,4 +1,3 @@
-import SectionHeader from "../ui/SectionHeader";
 import MediaSlider from "../ui/MediaSlider";
 import { useLanguage } from "../../context/LanguageContext";
 import constructionCrane from "../../assets/OurWork/01_construction_site_crane.png";
@@ -19,17 +18,7 @@ const MEDIA = [
 export default function MediaShowcase() {
   const { t } = useLanguage();
   return (
-    <section className="sms-section bg-white border-y border-charcoal-100">
-      <div className="sms-container">
-        <div className="mb-10">
-          <SectionHeader
-            align="center"
-            titleSize="lg"
-            eyebrow={t("home.mediaEyebrow")}
-            title={t("home.mediaTitle")}
-          />
-        </div>
-      </div>
+    <section className="pt-2 pb-16 bg-white md:pt-4 md:pb-24">
       <div className="px-4 sm:px-6 lg:px-8">
         <MediaSlider surface="light" items={MEDIA} interval={10000} prevLabel={t("home.mediaPrev")} nextLabel={t("home.mediaNext")} />
       </div>
